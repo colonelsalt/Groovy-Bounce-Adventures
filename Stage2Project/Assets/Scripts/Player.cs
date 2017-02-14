@@ -30,17 +30,11 @@ public class Player : MonoBehaviour
 
         if (Input.GetKey(KeyCode.W))
         {
-        	if (transform.position.z >= -55)
-        	{
-				direction += Vector3.up;
-        	}
+            direction += Vector3.forward;
         }
         else if (Input.GetKey(KeyCode.S))
         {
-        	if (transform.position.z <= 55)
-        	{
-				direction += -Vector3.down;
-        	}
+            direction += -Vector3.forward;
         }
 
         mBody.AddForce(direction * Speed * Time.deltaTime);
