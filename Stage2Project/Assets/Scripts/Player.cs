@@ -24,16 +24,8 @@ public class Player : MonoBehaviour
     {
     	Debug.Log("Touching " + col.gameObject.tag);
 
-    	if (col.gameObject.tag == "Horizontal wall")
-    	{
-    		touchingHorizontal = true;
-    		touchingVertical = false;
-		}
-    	else if (col.gameObject.tag == "Vertical wall")
-    	{
-    		touchingVertical = true;
-    		touchingHorizontal = false;
-		}
+    	if (col.gameObject.tag == "Horizontal wall") touchingHorizontal = true;
+    	else if (col.gameObject.tag == "Vertical wall") touchingVertical = true;
     }
     void OnCollisionExit(Collision col)
     {
@@ -44,25 +36,27 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-		directionDistance = Vector3.zero;
 		if (Input.GetKey(KeyCode.A) && touchingHorizontal)
         {
-            directionDistance += -Vector3.right * Speed * Time.deltaTime;
+            transform.position += -Vector3.right * Speed * Time.deltaTime;
         }
 		else if (Input.GetKey(KeyCode.D) && touchingHorizontal)
         {
-            directionDistance += Vector3.right * Speed * Time.deltaTime;
+            transform.position += Vector3.right * Speed * Time.deltaTime;
         }
 		else if (Input.GetKey(KeyCode.W) && touchingVertical)
         {
-            directionDistance += Vector3.forward * Speed * Time.deltaTime;
+            transform.position += Vector3.forward * Speed * Time.deltaTime;
         }
 		else if (Input.GetKey(KeyCode.S) && touchingVertical)
         {
-            directionDistance += -Vector3.forward * Speed * Time.deltaTime;
+            transform.position += -Vector3.forward * Speed * Time.deltaTime;
         }
+        // contain player within bounds of outer walls
+		float newX = Mathf.Clamp(transform.position.x, (-Arena.Width / 2) + VerticalWall.Width, (Arena.Width / 2) - VerticalWall.Width);
+		float newZ = Mathf.Clamp(transform.position.z, (-Arena.Height / 2) + HorizontalWall.Height, (Arena.Height / 2) - HorizontalWall.Height);
 
-		transform.position += directionDistance;
+		transform.position = new Vector3(newX, transform.position.y, newZ);
 		mBody.AddForce(directionForce * Speed * Time.deltaTime);
     }
 }

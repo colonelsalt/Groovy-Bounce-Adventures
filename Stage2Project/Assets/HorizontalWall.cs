@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VerticalWall : MonoBehaviour {
+public class HorizontalWall : MonoBehaviour {
 
 	public static float Width;
 	public static float Height;
