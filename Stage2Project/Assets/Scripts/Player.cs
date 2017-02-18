@@ -26,11 +26,13 @@ public class Player : MonoBehaviour
     	if (col.gameObject.tag == "Horizontal wall")
     	{
     		touchingHorizontal = true;
+    		bounced = false;
     		FreezePosition();
 		}
     	else if (col.gameObject.tag == "Vertical wall")
     	{
     		touchingVertical = true;
+    		bounced = false;
     		FreezePosition();
 		}
     }
@@ -74,6 +76,16 @@ public class Player : MonoBehaviour
 			if (touchingHorizontal && !touchingVertical)
         	{ // assign bouncing force depending on whether player is at top or bottom of the screen
         		Debug.Log("Bounced vertical");
+				if (transform.position.z > 0) // if player at top of screen
+				{
+					mBody.velocity = new Vector3(bounceFactor * (Mathf.Sqrt(3) / 2f), 0f, 0.5f * bounceFactor);
+					directionForce = bounceFactor * Vector3.back;
+				}
+				else
+				{
+					mBody.velocity = new Vector3(0.5f * bounceFactor, 0f, bounceFactor * (Mathf.Sqrt(3) / 2f));
+					directionForce = bounceFactor * Vector3.back;
+				}
         		directionForce = (transform.position.z > 0) ? bounceFactor * Vector3.back : bounceFactor * Vector3.forward;
 			} 
 			else if (touchingVertical && !touchingHorizontal)
@@ -88,19 +100,46 @@ public class Player : MonoBehaviour
         }
 
 
-        if (movedLinear)
-        {
-			// contain player within bounds of outer walls
-			float newX = Mathf.Clamp(transform.position.x, (-Arena.Width / 2) + VerticalWall.Width, (Arena.Width / 2) - VerticalWall.Width);
-			float newZ = Mathf.Clamp(transform.position.z, (-Arena.Height / 2) + HorizontalWall.Height, (Arena.Height / 2) - HorizontalWall.Height);
-			transform.position = new Vector3(newX, transform.position.y, newZ);
-        }
+        if (movedLinear) FreezePosition();
         else if (bounced) mBody.AddForce(directionForce * Speed * Time.deltaTime);
     }
 
 	private void FreezePosition()
 	{
+		Debug.Log("Freezing position!");
 		mBody.constraints = RigidbodyConstraints.FreezeAll;
+		mBody.velocity = Vector3.zero;
+
+		// contain player within bounds of outer walls
+		float newX = Mathf.Clamp(transform.position.x, (-Arena.Width / 2) + VerticalWall.Width, (Arena.Width / 2) - VerticalWall.Width);
+		float newZ = Mathf.Clamp(transform.position.z, (-Arena.Height / 2) + HorizontalWall.Height, (Arena.Height / 2) - HorizontalWall.Height);
+		transform.position = new Vector3(newX, 0.5f, newZ);
+	}
+
+	private float getBounceAngle()
+	{
+		if (touchingHorizontal && !touchingVertical)
+		{
+			if (transform.position.z < 0) // if player at the bottom of the screen
+			{
+				return (Mathf.PI / 6f); // 30 deg. 
+			}
+			else // player is at the top of the screen
+			{
+				return (7f * Mathf.PI / 6f); // 210 deg.
+			}
+		}
+		else if (touchingVertical && !touchingHorizontal)
+		{
+			if (transform.position.x > 0) // if player at the right of the screen
+			{
+				return (2f * Mathf.PI / 3f); // 120 deg.
+			}
+			else // player is at the left of the screen
+			{
+				return (Mathf.PI / 6f); // 30 deg. 
+			}
+		}
 	}
 }
 
