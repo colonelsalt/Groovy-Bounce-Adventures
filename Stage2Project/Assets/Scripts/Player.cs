@@ -45,25 +45,25 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-		if (Input.GetKey(KeyCode.A) && touchingHorizontal)
+		if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && touchingHorizontal)
         {
             transform.position += -Vector3.right * Speed * Time.deltaTime;
             movedLinear = true;
             bounced = false;
         }
-		else if (Input.GetKey(KeyCode.D) && touchingHorizontal)
+		else if ((Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) && touchingHorizontal)
         {
             transform.position += Vector3.right * Speed * Time.deltaTime;
             movedLinear = true;
             bounced = false;
         }
-		else if (Input.GetKey(KeyCode.W) && touchingVertical)
+		else if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))  && touchingVertical)
         {
             transform.position += Vector3.forward * Speed * Time.deltaTime;
             movedLinear = true;
             bounced = false;
         }
-		else if (Input.GetKey(KeyCode.S) && touchingVertical)
+		else if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.UpArrow)) && touchingVertical)
         {
             transform.position += -Vector3.forward * Speed * Time.deltaTime;
             movedLinear = true;
@@ -79,7 +79,7 @@ public class Player : MonoBehaviour
         	bounced = true;
         	movedLinear = false;
         	touchingHorizontal = touchingVertical = false;
-        	Debug.Log("Bounced by " + bounceAngle / Mathf.PI * 180f);
+        	Debug.Log("Bounced by " + bounceAngle * Mathf.Rad2Deg);
         }
 
 
@@ -103,18 +103,25 @@ public class Player : MonoBehaviour
 
 	private float GetBounceAngle()
 	{
-		if (touchingHorizontal && !touchingVertical)
+		if (touchingHorizontal)
 		{
 			if (transform.position.z < 0) // if player at the bottom of the screen
 			{
-				return (Mathf.PI / 6f); // 30 deg. 
+				if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+				{
+					return Random.Range(120 * Mathf.Deg2Rad, 150 * Mathf.Deg2Rad);
+				}
+				else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+				{
+					return Random.Range(30 * Mathf.Deg2Rad, 60 * Mathf.Deg2Rad);
+				}
 			}
 			else // player is at the top of the screen
 			{
-				return (7f * Mathf.PI / 6f); // 210 deg.
+				return 210 * Mathf.Deg2Rad; // 210 deg.
 			}
 		}
-		else if (touchingVertical && !touchingHorizontal)
+		else if (touchingHorizontal)
 		{
 			if (transform.position.x > 0) // if player at the right of the screen
 			{
