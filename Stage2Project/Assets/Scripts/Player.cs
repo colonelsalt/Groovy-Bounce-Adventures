@@ -63,14 +63,14 @@ public class Player : MonoBehaviour
             movedLinear = true;
             bounced = false;
         }
-		else if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.UpArrow)) && touchingVertical)
+		else if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) && touchingVertical)
         {
             transform.position += -Vector3.forward * Speed * Time.deltaTime;
             movedLinear = true;
             bounced = false;
         }
 
-        else if (Input.GetKey(KeyCode.Space) && (touchingVertical || touchingHorizontal))
+        if (Input.GetKey(KeyCode.Space) && (touchingVertical || touchingHorizontal))
         {
         	mBody.constraints = RigidbodyConstraints.None;
 			float bounceAngle = GetBounceAngle();
@@ -103,37 +103,97 @@ public class Player : MonoBehaviour
 
 	private float GetBounceAngle()
 	{
-		if (touchingHorizontal)
+		if (touchingHorizontal && !touchingVertical)
 		{
 			if (transform.position.z < 0) // if player at the bottom of the screen
 			{
-				if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+				if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
 				{
-					return Random.Range(120 * Mathf.Deg2Rad, 150 * Mathf.Deg2Rad);
+					return Random.Range(-60 * Mathf.Deg2Rad, -30 * Mathf.Deg2Rad);
 				}
-				else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+				else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
 				{
 					return Random.Range(30 * Mathf.Deg2Rad, 60 * Mathf.Deg2Rad);
+				}
+				else
+				{
+					return Random.Range(-10f * Mathf.Deg2Rad, 10 * Mathf.Deg2Rad);
 				}
 			}
 			else // player is at the top of the screen
 			{
-				return 210 * Mathf.Deg2Rad; // 210 deg.
+				if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+				{
+					return Random.Range(210 * Mathf.Deg2Rad, 240 * Mathf.Deg2Rad);
+				}
+				else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+				{
+					return Random.Range(120 * Mathf.Deg2Rad, 150 * Mathf.Deg2Rad);
+				}
+				else
+				{
+					return Random.Range(170 * Mathf.Deg2Rad, 190 * Mathf.Deg2Rad);
+				}
 			}
 		}
-		else if (touchingHorizontal)
+		else if (touchingVertical && !touchingHorizontal)
 		{
 			if (transform.position.x > 0) // if player at the right of the screen
 			{
-				return (-2f * Mathf.PI / 3f); // 120 deg.
+				if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+				{
+					return Random.Range(-60 * Mathf.Deg2Rad, -30 * Mathf.Deg2Rad);
+				}
+				else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+				{
+					return Random.Range(-120 * Mathf.Deg2Rad, -150 * Mathf.Deg2Rad);
+				}
+				else
+				{
+					return Random.Range(-100 * Mathf.Deg2Rad, -80 * Mathf.Deg2Rad);
+				}
 			}
 			else // player is at the left of the screen
 			{
-				return (Mathf.PI / 6f); // 30 deg. 
+				if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+				{
+					return Random.Range(30 * Mathf.Deg2Rad, 60 * Mathf.Deg2Rad);
+				}
+				else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+				{
+					return Random.Range(120 * Mathf.Deg2Rad, 150 * Mathf.Deg2Rad);
+				}
+				else 
+				{
+					return Random.Range(80 * Mathf.Deg2Rad, 100 * Mathf.Deg2Rad); 
+				}				
 			}
 		}
-		Debug.Log("DERP!");
-		return 0f;
+		else // i.e. the player is at a corner, touching both a vertical and horizontal wall at the same time
+		{
+			if (transform.position.x < 0)
+			{
+				if (transform.position.z < 0) // player at bottom left
+				{
+					return 30 * Mathf.Deg2Rad;
+				}
+				else // player at top left
+				{
+					return 120 * Mathf.Deg2Rad;
+				}
+			}
+			else
+			{
+				if (transform.position.z < 0) // player at bottom right
+				{
+					return -30 * Mathf.Deg2Rad;
+				}
+				else // player at top right
+				{
+					return -120 * Mathf.Deg2Rad;
+				}
+			}
+		}
 	}
 
 	private void ClampToCeiling()
@@ -141,7 +201,7 @@ public class Player : MonoBehaviour
 		Debug.Log("Clamping to " + HorizontalWall.Depth / 2f);
 		if (transform.position.y > HorizontalWall.Depth / 2f)
 		{
-			transform.position = new Vector3(transform.position.x, 0.5f, transform.position.z);
+			transform.position = new Vector3(transform.position.x, transform.position.y / 2f, transform.position.z);
 		}
 	}
 }
