@@ -7,7 +7,7 @@ public class Player : MonoBehaviour
 {
     [SerializeField]
     public float Speed;
-    public float bounceFactor;
+    public float bounceFactor, velocityBoost;
 
     private Rigidbody mBody;
 	private Vector3 directionForce;
@@ -73,35 +73,20 @@ public class Player : MonoBehaviour
         else if (Input.GetKey(KeyCode.Space) && (touchingVertical || touchingHorizontal))
         {
         	mBody.constraints = RigidbodyConstraints.None;
-			if (touchingHorizontal && !touchingVertical)
-        	{ // assign bouncing force depending on whether player is at top or bottom of the screen
-        		Debug.Log("Bounced vertical");
-				if (transform.position.z > 0) // if player at top of screen
-				{
-					mBody.velocity = new Vector3(bounceFactor * (Mathf.Sqrt(3) / 2f), 0f, 0.5f * bounceFactor);
-					directionForce = bounceFactor * Vector3.back;
-				}
-				else
-				{
-					mBody.velocity = new Vector3(0.5f * bounceFactor, 0f, bounceFactor * (Mathf.Sqrt(3) / 2f));
-					directionForce = bounceFactor * Vector3.back;
-				}
-        		directionForce = (transform.position.z > 0) ? bounceFactor * Vector3.back : bounceFactor * Vector3.forward;
-			} 
-			else if (touchingVertical && !touchingHorizontal)
-        	{ // assign bouncing force depending on whether player is at the left or at the right side of the screen
-        		Debug.Log("Bounced horizontal");
-        		directionForce = (transform.position.x > 0) ? bounceFactor * Vector3.left : bounceFactor * Vector3.right; 
-        	}
+			float bounceAngle = GetBounceAngle();
+			mBody.velocity = new Vector3(velocityBoost * Mathf.Sin(bounceAngle), 0, velocityBoost * Mathf.Cos(bounceAngle));
+			directionForce = new Vector3(bounceFactor * Mathf.Sin(bounceAngle), 0, bounceFactor * Mathf.Cos(bounceAngle));
         	bounced = true;
         	movedLinear = false;
         	touchingHorizontal = touchingVertical = false;
-        	Debug.Log("Bounced by " + directionForce);
+        	Debug.Log("Bounced by " + bounceAngle / Mathf.PI * 180f);
         }
 
 
         if (movedLinear) FreezePosition();
         else if (bounced) mBody.AddForce(directionForce * Speed * Time.deltaTime);
+
+        ClampToCeiling();
     }
 
 	private void FreezePosition()
@@ -116,7 +101,7 @@ public class Player : MonoBehaviour
 		transform.position = new Vector3(newX, 0.5f, newZ);
 	}
 
-	private float getBounceAngle()
+	private float GetBounceAngle()
 	{
 		if (touchingHorizontal && !touchingVertical)
 		{
@@ -133,12 +118,23 @@ public class Player : MonoBehaviour
 		{
 			if (transform.position.x > 0) // if player at the right of the screen
 			{
-				return (2f * Mathf.PI / 3f); // 120 deg.
+				return (-2f * Mathf.PI / 3f); // 120 deg.
 			}
 			else // player is at the left of the screen
 			{
 				return (Mathf.PI / 6f); // 30 deg. 
 			}
+		}
+		Debug.Log("DERP!");
+		return 0f;
+	}
+
+	private void ClampToCeiling()
+	{
+		Debug.Log("Clamping to " + HorizontalWall.Depth / 2f);
+		if (transform.position.y > HorizontalWall.Depth / 2f)
+		{
+			transform.position = new Vector3(transform.position.x, 0.5f, transform.position.z);
 		}
 	}
 }
