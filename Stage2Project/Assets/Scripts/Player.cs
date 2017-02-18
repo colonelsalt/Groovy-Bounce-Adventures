@@ -7,32 +7,37 @@ public class Player : MonoBehaviour
 {
     [SerializeField]
     public float Speed;
-    public float bounceFactor, velocityBoost;
+    public float bounceFactor, velocityBoost, floatDistance;
+	public bool touchingHorizontal, touchingVertical, movedLinear, bounced;
 
     private Rigidbody mBody;
 	private Vector3 directionForce;
-	private bool touchingHorizontal, touchingVertical, movedLinear, bounced;
+	private float leftBound, rightBound, bottomBound, topBound;
 
-    void Awake()
+
+    void Start()
     {
-    	touchingHorizontal = touchingVertical = movedLinear = bounced = false;
+    	touchingHorizontal = true;
+    	touchingVertical = movedLinear = bounced = false;
+		leftBound = (-Arena.Width / 2) + VerticalWall.Width;
+		rightBound = (Arena.Width / 2) - VerticalWall.Width;
+		bottomBound = (-Arena.Height / 2) + HorizontalWall.Height;
+		topBound = (Arena.Height / 2) - HorizontalWall.Height;
         mBody = GetComponent<Rigidbody>();
     }
 
-    void OnTriggerEnter(Collider col)
+   /* void OnTriggerEnter(Collider col)
     {
     	Debug.Log("Touching " + col.gameObject.tag);
 
     	if (col.gameObject.tag == "Horizontal wall")
     	{
     		touchingHorizontal = true;
-    		bounced = false;
     		FreezePosition();
 		}
     	else if (col.gameObject.tag == "Vertical wall")
     	{
     		touchingVertical = true;
-    		bounced = false;
     		FreezePosition();
 		}
     }
@@ -41,38 +46,43 @@ public class Player : MonoBehaviour
     	Debug.Log("Collision ended!");
     	if (col.gameObject.tag == "Horizontal wall") touchingHorizontal = false;
     	else if (col.gameObject.tag == "Vertical wall") touchingVertical = false;
-    }
+    }*/
 
     void Update()
     {
 		if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && touchingHorizontal)
         {
             transform.position += -Vector3.right * Speed * Time.deltaTime;
+			if (transform.position.x != leftBound && transform.position.x != rightBound) touchingVertical = false;
             movedLinear = true;
             bounced = false;
         }
 		else if ((Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) && touchingHorizontal)
         {
             transform.position += Vector3.right * Speed * Time.deltaTime;
+			if (transform.position.x != leftBound && transform.position.x != rightBound) touchingVertical = false;
             movedLinear = true;
             bounced = false;
         }
 		else if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))  && touchingVertical)
         {
             transform.position += Vector3.forward * Speed * Time.deltaTime;
+			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
             movedLinear = true;
             bounced = false;
         }
 		else if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) && touchingVertical)
         {
             transform.position += -Vector3.forward * Speed * Time.deltaTime;
+			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
             movedLinear = true;
             bounced = false;
         }
 
         if (Input.GetKey(KeyCode.Space) && (touchingVertical || touchingHorizontal))
         {
-        	mBody.constraints = RigidbodyConstraints.None;
+        	mBody.constraints = RigidbodyConstraints.FreezePositionY;
+        	mBody.isKinematic = false;
 			float bounceAngle = GetBounceAngle();
 			mBody.velocity = new Vector3(velocityBoost * Mathf.Sin(bounceAngle), 0, velocityBoost * Mathf.Cos(bounceAngle));
 			directionForce = new Vector3(bounceFactor * Mathf.Sin(bounceAngle), 0, bounceFactor * Mathf.Cos(bounceAngle));
@@ -81,24 +91,23 @@ public class Player : MonoBehaviour
         	touchingHorizontal = touchingVertical = false;
         	Debug.Log("Bounced by " + bounceAngle * Mathf.Rad2Deg);
         }
-
-
-        if (movedLinear) FreezePosition();
         else if (bounced) mBody.AddForce(directionForce * Speed * Time.deltaTime);
 
-        ClampToCeiling();
+		ClampToPlaySpace();
     }
 
 	private void FreezePosition()
 	{
-		Debug.Log("Freezing position!");
+		//Debug.Log("Freezing position!");
+		mBody.isKinematic = true;
 		mBody.constraints = RigidbodyConstraints.FreezeAll;
 		mBody.velocity = Vector3.zero;
+		bounced = false;
 
 		// contain player within bounds of outer walls
-		float newX = Mathf.Clamp(transform.position.x, (-Arena.Width / 2) + VerticalWall.Width, (Arena.Width / 2) - VerticalWall.Width);
+		/*float newX = Mathf.Clamp(transform.position.x, (-Arena.Width / 2) + VerticalWall.Width, (Arena.Width / 2) - VerticalWall.Width);
 		float newZ = Mathf.Clamp(transform.position.z, (-Arena.Height / 2) + HorizontalWall.Height, (Arena.Height / 2) - HorizontalWall.Height);
-		transform.position = new Vector3(newX, 0.5f, newZ);
+		transform.position = new Vector3(newX, 0.5f, newZ);*/
 	}
 
 	private float GetBounceAngle()
@@ -196,12 +205,39 @@ public class Player : MonoBehaviour
 		}
 	}
 
-	private void ClampToCeiling()
+	private void ClampToPlaySpace()
 	{
-		Debug.Log("Clamping to " + HorizontalWall.Depth / 2f);
-		if (transform.position.y > HorizontalWall.Depth / 2f)
+		if (transform.position.x < leftBound)
 		{
-			transform.position = new Vector3(transform.position.x, transform.position.y / 2f, transform.position.z);
+			Debug.Log("Player at left of screen!");
+			touchingVertical = true;
+
+			transform.position = new Vector3(leftBound + floatDistance, 0.5f, transform.position.z);
+			FreezePosition();
+		}
+		else if (transform.position.x > rightBound)
+		{
+			Debug.Log("Player at right of screen!");
+			touchingVertical = true;
+			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
+			transform.position = new Vector3(rightBound - floatDistance, 0.5f, transform.position.z);
+			FreezePosition();
+		}
+		else if (transform.position.z < bottomBound)
+		{
+			Debug.Log("Player at bottom of screen!");
+			touchingHorizontal = true;
+			if (transform.position.z != leftBound && transform.position.z != rightBound) touchingVertical = false;
+			transform.position = new Vector3(transform.position.x + floatDistance, 0.5f, bottomBound);
+			FreezePosition();
+		}
+		else if (transform.position.z > topBound)
+		{
+			Debug.Log("Player at top of screen!");
+			touchingHorizontal = true;
+			if (transform.position.z != leftBound && transform.position.z != rightBound) touchingVertical = false;
+			transform.position = new Vector3(transform.position.x + floatDistance, 0.5f, topBound);
+			FreezePosition();
 		}
 	}
 }

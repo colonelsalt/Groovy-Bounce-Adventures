@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         Arena.Calculate();
-        mPlayer.enabled = false;
+        //mPlayer.enabled = false;
         mState = State.Paused;
     }
 
@@ -72,7 +72,8 @@ public class GameManager : MonoBehaviour
             mObjects.Clear();
         }
 
-        mPlayer.transform.position = new Vector3(0.0f, 0.5f, 0.0f);
+        mPlayer.transform.position = new Vector3(4.5f, 0.5f, -55f); // TODO: change this to something not hardcoded
+
         mNextSpawn = TimeBetweenSpawns;
         mPlayer.enabled = true;
         mState = State.Playing;
