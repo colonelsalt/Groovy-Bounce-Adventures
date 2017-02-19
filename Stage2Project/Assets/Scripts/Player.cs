@@ -9,10 +9,12 @@ public class Player : MonoBehaviour
     public float Speed;
     public float bounceFactor, velocityBoost, floatDistance;
 	public bool touchingHorizontal, touchingVertical, movedLinear, bounced;
+	public int health;
 
     private Rigidbody mBody;
 	private Vector3 directionForce;
 	private float leftBound, rightBound, bottomBound, topBound;
+	private HealthCounter healthCounter;
 
 
     void Start()
@@ -24,6 +26,7 @@ public class Player : MonoBehaviour
 		bottomBound = (-Arena.Height / 2) + HorizontalWall.Height;
 		topBound = (Arena.Height / 2) - HorizontalWall.Height;
         mBody = GetComponent<Rigidbody>();
+        healthCounter = FindObjectOfType<HealthCounter>();
     }
 
    /* void OnTriggerEnter(Collider col)
@@ -239,6 +242,12 @@ public class Player : MonoBehaviour
 			transform.position = new Vector3(transform.position.x + floatDistance, 0.5f, topBound);
 			FreezePosition();
 		}
+	}
+
+	public void TakeDamage(int amount)
+	{
+		health -= amount;
+		healthCounter.UpdateDisplay();
 	}
 }
 
