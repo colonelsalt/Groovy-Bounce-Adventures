@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 44f1fcf29e42de6489fd8d009f911582
+timeCreated: 1487464503
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Stranger back in the Night
+  fontNames:
+  - Stranger back in the Night
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

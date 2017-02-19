@@ -4,12 +4,15 @@ using UnityEngine;
 
 public class Food : MonoBehaviour {
 
+	public int ScoreValue;
 	public float startForce;
 	private Rigidbody mBody;
+	private Score score;
 
 	void Awake()
 	{
 		mBody = GetComponent<Rigidbody>();
+		score = FindObjectOfType<Score>();
 	}
 
 	void Start ()
@@ -27,6 +30,7 @@ public class Food : MonoBehaviour {
 	{
 		if (col.gameObject.tag == "Player")
 		{
+			score.IncrementScore(ScoreValue);
 			Destroy(gameObject);
 		}
 		/*else if (col.gameObject.tag == "Horizontal wall" || col.gameObject.tag == "Vertical wall")
