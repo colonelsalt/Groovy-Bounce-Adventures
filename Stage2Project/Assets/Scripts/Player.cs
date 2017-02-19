@@ -12,44 +12,33 @@ public class Player : MonoBehaviour
 	public int health;
 
     private Rigidbody mBody;
+    private Renderer renderer;
 	private Vector3 directionForce;
 	private float leftBound, rightBound, bottomBound, topBound;
 	private HealthCounter healthCounter;
+	private bool powerUpActive;
+	private PowerUp.Type currentPowerType;
+	private float powerUpTimer;
 
+	// TODO: remove this simplified fix for changing colours
+	private Color defaultColour;
 
     void Start()
     {
-    	touchingHorizontal = true;
-    	touchingVertical = movedLinear = bounced = false;
 		leftBound = (-Arena.Width / 2) + VerticalWall.Width;
 		rightBound = (Arena.Width / 2) - VerticalWall.Width;
 		bottomBound = (-Arena.Height / 2) + HorizontalWall.Height;
 		topBound = (Arena.Height / 2) - HorizontalWall.Height;
+
+    	touchingHorizontal = true;
+    	touchingVertical = movedLinear = bounced = false;
+    	currentPowerType = PowerUp.Type.None;
+
         mBody = GetComponent<Rigidbody>();
         healthCounter = FindObjectOfType<HealthCounter>();
+        renderer = GetComponent<Renderer>();
+        defaultColour = renderer.material.color;
     }
-
-   /* void OnTriggerEnter(Collider col)
-    {
-    	Debug.Log("Touching " + col.gameObject.tag);
-
-    	if (col.gameObject.tag == "Horizontal wall")
-    	{
-    		touchingHorizontal = true;
-    		FreezePosition();
-		}
-    	else if (col.gameObject.tag == "Vertical wall")
-    	{
-    		touchingVertical = true;
-    		FreezePosition();
-		}
-    }
-    void OnTriggerExit(Collider col)
-    {
-    	Debug.Log("Collision ended!");
-    	if (col.gameObject.tag == "Horizontal wall") touchingHorizontal = false;
-    	else if (col.gameObject.tag == "Vertical wall") touchingVertical = false;
-    }*/
 
     void Update()
     {
@@ -94,23 +83,39 @@ public class Player : MonoBehaviour
         	touchingHorizontal = touchingVertical = false;
         	Debug.Log("Bounced by " + bounceAngle * Mathf.Rad2Deg);
         }
-        else if (bounced) mBody.AddForce(directionForce * Speed * Time.deltaTime);
+        if (Input.GetKey(KeyCode.Return) && currentPowerType != PowerUp.Type.None)
+        {
+        	ActivatePowerUp();
+        }
+
+        if (bounced) mBody.AddForce(directionForce * Speed * Time.deltaTime);
+        if (powerUpActive) CheckPowerUp();
 
 		ClampToPlaySpace();
     }
 
+    void OnCollisionEnter(Collision col)
+    {
+    	if (col.gameObject.tag == "Enemy")
+    	{
+    		if (!powerUpActive)
+    		{
+    			Enemy enemy = col.gameObject.GetComponent<Enemy>();
+    			TakeDamage(enemy.Damage);
+    		}
+    		else if (powerUpActive && currentPowerType == PowerUp.Type.Hammer)
+    		{
+    			Destroy(col.gameObject);
+    		}
+    	}
+    }
+
 	private void FreezePosition()
 	{
-		//Debug.Log("Freezing position!");
 		mBody.isKinematic = true;
 		mBody.constraints = RigidbodyConstraints.FreezeAll;
 		mBody.velocity = Vector3.zero;
 		bounced = false;
-
-		// contain player within bounds of outer walls
-		/*float newX = Mathf.Clamp(transform.position.x, (-Arena.Width / 2) + VerticalWall.Width, (Arena.Width / 2) - VerticalWall.Width);
-		float newZ = Mathf.Clamp(transform.position.z, (-Arena.Height / 2) + HorizontalWall.Height, (Arena.Height / 2) - HorizontalWall.Height);
-		transform.position = new Vector3(newX, 0.5f, newZ);*/
 	}
 
 	private float GetBounceAngle()
@@ -248,6 +253,37 @@ public class Player : MonoBehaviour
 	{
 		health -= amount;
 		healthCounter.UpdateDisplay();
+	}
+
+	public void SetPowerUp(PowerUp.Type type)
+	{
+		currentPowerType = type;
+	}
+
+	private void ActivatePowerUp()
+	{
+		Debug.Log("Powerup activating!");
+		powerUpActive = true;
+		powerUpTimer = 6f;
+		switch (currentPowerType)
+		{
+			// TODO: make a neater/flashier graphical effect for these powerups:
+			case PowerUp.Type.Hammer:
+				renderer.material.color = Color.magenta;
+				break;
+		}
+	}
+
+	private void CheckPowerUp()
+	{
+		powerUpTimer -= Time.deltaTime;
+		Debug.Log("Powerup timer currently at " + powerUpTimer);
+		if (powerUpTimer <= 0f)
+		{
+			powerUpActive = false;
+			renderer.material.color = defaultColour;
+			currentPowerType = PowerUp.Type.None;
+		}
 	}
 }
 

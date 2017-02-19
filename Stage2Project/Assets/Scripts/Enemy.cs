@@ -15,14 +15,4 @@ public class Enemy : MonoBehaviour {
 	void Update () {
 		
 	}
-
-	void OnCollisionEnter(Collision col)
-	{
-		if (col.gameObject.tag == "Player")
-		{
-			Player player = col.gameObject.GetComponent<Player>();
-			player.TakeDamage(Damage);
-		}
-			
-	}
 }
