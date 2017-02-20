@@ -12,6 +12,7 @@ public class Player : MonoBehaviour
 	public bool touchingHorizontal, touchingVertical, movedLinear, bounced;
 	public int health;
 	public GameObject projectile;
+	public PowerUp.Type currentPowerType;
 
     private Rigidbody mBody;
     private Renderer renderer;
@@ -20,7 +21,6 @@ public class Player : MonoBehaviour
 	private float leftBound, rightBound, bottomBound, topBound;
 	private HealthCounter healthCounter;
 	private bool powerUpActive;
-	private PowerUp.Type currentPowerType;
 	private float powerUpTimer;
 
 	// TODO: remove this simplified fix for changing colours
@@ -87,11 +87,11 @@ public class Player : MonoBehaviour
         	touchingHorizontal = touchingVertical = false;
         	Debug.Log("Bounced by " + bounceAngle * Mathf.Rad2Deg);
         }
-        if (Input.GetKeyDown(KeyCode.Return) && currentPowerType != PowerUp.Type.None)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && currentPowerType != PowerUp.Type.None)
         {
         	ActivatePowerUp();
         }
-        if (Input.GetKeyUp(KeyCode.Return))
+        if (Input.GetKeyUp(KeyCode.LeftShift))
         {
         	DeactivatePowerUp();
         }
@@ -111,7 +111,7 @@ public class Player : MonoBehaviour
     			Enemy enemy = col.gameObject.GetComponent<Enemy>();
     			TakeDamage(enemy.Damage);
     		}
-    		else if (Input.GetKey(KeyCode.Return) && currentPowerType == PowerUp.Type.Hammer)
+    		else if (Input.GetKey(KeyCode.LeftShift) && currentPowerType == PowerUp.Type.Hammer)
     		{
     			Destroy(col.gameObject);
     		}
@@ -304,7 +304,43 @@ public class Player : MonoBehaviour
 		Vector3 firePos = new Vector3(transform.position.x, 0.5f, transform.position.z);
 		GameObject shot = Instantiate(projectile, firePos, Quaternion.identity) as GameObject;
 		Rigidbody fireBody = shot.GetComponent<Rigidbody>();
-		fireBody.velocity = new Vector3(mBody.velocity.x * projectileSpeed, 0f, mBody.velocity.z * projectileSpeed);
+		if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+		{
+			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+			{ // shoot southwest
+				fireBody.velocity = projectileSpeed * (Vector3.back + Vector3.left).normalized;
+			}
+			else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+			{ // shoot southeast
+				fireBody.velocity = projectileSpeed * (Vector3.back + Vector3.right).normalized;
+			}
+			else fireBody.velocity = Vector3.back * projectileSpeed; // shoot downwards
+		}
+		else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+		{
+			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+			{ // shoot northwest
+				fireBody.velocity = projectileSpeed * (Vector3.forward + Vector3.left).normalized;
+			}
+			else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+			{ // shoot northeast
+				fireBody.velocity = projectileSpeed * (Vector3.forward + Vector3.right).normalized;
+			}
+			else fireBody.velocity = Vector3.forward * projectileSpeed; // shoot upwards
+
+		}
+		else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+		{
+			fireBody.velocity = Vector3.left * projectileSpeed; // shoot left
+		}
+		else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+		{
+			fireBody.velocity = Vector3.right * projectileSpeed; // shoot right
+		}
+		else
+		{
+			fireBody.velocity = mBody.velocity.normalized * projectileSpeed; // shoot in the direction of player travel
+		}
 	}
 
 	private void CheckPowerUp()
@@ -317,6 +353,7 @@ public class Player : MonoBehaviour
 			powerUpActive = false;
 			renderer.material.color = defaultColour;
 			currentPowerType = PowerUp.Type.None;
+			CancelInvoke("FireGun");
 		}
 	}
 }

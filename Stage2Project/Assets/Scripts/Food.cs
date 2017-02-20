@@ -16,6 +16,8 @@ public class Food : MonoBehaviour {
 	{
 		if (col.gameObject.tag == "Player")
 		{
+			Player player = col.gameObject.GetComponent<Player>();
+			//if (player.currentPowerType == PowerUp.Type.Hammer && )
 			score.IncrementScore(ScoreValue);
 			Destroy(gameObject);
 		}
