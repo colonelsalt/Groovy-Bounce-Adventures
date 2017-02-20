@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
     private Rigidbody mBody;
     private Renderer renderer;
 	private Vector3 directionForce;
+	private PowerUpTimer timerDisplay;
 	private float leftBound, rightBound, bottomBound, topBound;
 	private HealthCounter healthCounter;
 	private bool powerUpActive;
@@ -36,6 +37,7 @@ public class Player : MonoBehaviour
 
         mBody = GetComponent<Rigidbody>();
         healthCounter = FindObjectOfType<HealthCounter>();
+        timerDisplay = FindObjectOfType<PowerUpTimer>();
         renderer = GetComponent<Renderer>();
         defaultColour = renderer.material.color;
     }
@@ -83,9 +85,13 @@ public class Player : MonoBehaviour
         	touchingHorizontal = touchingVertical = false;
         	Debug.Log("Bounced by " + bounceAngle * Mathf.Rad2Deg);
         }
-        if (Input.GetKey(KeyCode.Return) && currentPowerType != PowerUp.Type.None)
+        if (Input.GetKeyDown(KeyCode.Return) && currentPowerType != PowerUp.Type.None)
         {
         	ActivatePowerUp();
+        }
+        if (Input.GetKeyUp(KeyCode.Return))
+        {
+        	DeactivatePowerUp();
         }
 
         if (bounced) mBody.AddForce(directionForce * Speed * Time.deltaTime);
@@ -103,7 +109,7 @@ public class Player : MonoBehaviour
     			Enemy enemy = col.gameObject.GetComponent<Enemy>();
     			TakeDamage(enemy.Damage);
     		}
-    		else if (powerUpActive && currentPowerType == PowerUp.Type.Hammer)
+    		else if (Input.GetKey(KeyCode.Return) && currentPowerType == PowerUp.Type.Hammer)
     		{
     			Destroy(col.gameObject);
     		}
@@ -262,9 +268,12 @@ public class Player : MonoBehaviour
 
 	private void ActivatePowerUp()
 	{
-		Debug.Log("Powerup activating!");
-		powerUpActive = true;
-		powerUpTimer = 6f;
+		if (!powerUpActive)
+		{
+			Debug.Log("Powerup activating!");
+			powerUpActive = true;
+			powerUpTimer = 6f;
+		}
 		switch (currentPowerType)
 		{
 			// TODO: make a neater/flashier graphical effect for these powerups:
@@ -274,10 +283,17 @@ public class Player : MonoBehaviour
 		}
 	}
 
+	private void DeactivatePowerUp()
+	{
+		// TODO: make powerup-deactivation animation neater/flashier
+		renderer.material.color = defaultColour;
+	}
+
 	private void CheckPowerUp()
 	{
 		powerUpTimer -= Time.deltaTime;
 		Debug.Log("Powerup timer currently at " + powerUpTimer);
+		timerDisplay.UpdateDisplay(powerUpTimer);
 		if (powerUpTimer <= 0f)
 		{
 			powerUpActive = false;
