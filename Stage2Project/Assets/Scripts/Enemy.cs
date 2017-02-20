@@ -5,14 +5,15 @@ using UnityEngine;
 public class Enemy : MonoBehaviour {
 
 	public int Damage;
+	public int ScoreValue;
 
 	// Use this for initialization
 	void Start () {
 		
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		
+	void OnParticleTrigger()
+	{
+		Destroy(gameObject);
 	}
 }

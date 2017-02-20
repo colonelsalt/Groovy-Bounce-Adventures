@@ -4,12 +4,18 @@ using UnityEngine;
 
 public class PowerUp : MonoBehaviour {
 
-	public enum Type {None, Hammer};
+	public enum Type {None, Hammer, Gun, Shield, Bomb};
+	/*
+		-Shield is one-time activated, and simply prevents you from taking damage.
+		-Hammer is activated on per-press basis (but timer starts running from first press); it prevents damages
+		 and kills enemies in your path, but makes you slower.
+		-Gun lets you fire projectiles (in direction indicated by arrow keys) that kills enemies in path.
+	*/
 	private Type type;
 
 	// Use this for initialization
 	void Start () {
-		type = Type.Hammer;
+		type = Type.Gun;
 	}
 	
 	void OnTriggerEnter(Collider col)

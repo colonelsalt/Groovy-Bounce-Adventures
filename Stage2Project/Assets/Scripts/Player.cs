@@ -8,8 +8,10 @@ public class Player : MonoBehaviour
     [SerializeField]
     public float Speed;
     public float bounceFactor, velocityBoost, floatDistance;
+    public float projectileSpeed;
 	public bool touchingHorizontal, touchingVertical, movedLinear, bounced;
 	public int health;
+	public GameObject projectile;
 
     private Rigidbody mBody;
     private Renderer renderer;
@@ -272,13 +274,17 @@ public class Player : MonoBehaviour
 		{
 			Debug.Log("Powerup activating!");
 			powerUpActive = true;
-			powerUpTimer = 6f;
+			powerUpTimer = 10f;
 		}
 		switch (currentPowerType)
 		{
 			// TODO: make a neater/flashier graphical effect for these powerups:
 			case PowerUp.Type.Hammer:
 				renderer.material.color = Color.magenta;
+				break;
+			case PowerUp.Type.Gun:
+				renderer.material.color = Color.cyan;
+				InvokeRepeating("FireGun", 0.0000000001f, 0.25f);
 				break;
 		}
 	}
@@ -287,6 +293,18 @@ public class Player : MonoBehaviour
 	{
 		// TODO: make powerup-deactivation animation neater/flashier
 		renderer.material.color = defaultColour;
+		if (currentPowerType == PowerUp.Type.Gun)
+		{
+			CancelInvoke("FireGun");
+		}
+	}
+
+	private void FireGun()
+	{
+		Vector3 firePos = new Vector3(transform.position.x, 0.5f, transform.position.z);
+		GameObject shot = Instantiate(projectile, firePos, Quaternion.identity) as GameObject;
+		Rigidbody fireBody = shot.GetComponent<Rigidbody>();
+		fireBody.velocity = new Vector3(mBody.velocity.x * projectileSpeed, 0f, mBody.velocity.z * projectileSpeed);
 	}
 
 	private void CheckPowerUp()
