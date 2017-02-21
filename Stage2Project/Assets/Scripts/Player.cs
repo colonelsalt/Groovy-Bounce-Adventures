@@ -65,13 +65,12 @@ public class Player : MonoBehaviour
         {
         	mBody.constraints = RigidbodyConstraints.FreezePositionY;
         	mBody.isKinematic = false;
-			float bounceAngle = GetBounceAngle();
-			mBody.velocity = new Vector3(velocityBoost * Mathf.Sin(bounceAngle), 0, velocityBoost * Mathf.Cos(bounceAngle));
-			directionForce = new Vector3(bounceFactor * Mathf.Sin(bounceAngle), 0, bounceFactor * Mathf.Cos(bounceAngle));
+			Vector3 bounceDirection = GetBounceDirection();
+			mBody.velocity = velocityBoost * bounceDirection;
+			directionForce = bounceFactor * bounceDirection;
         	bounced = true;
         	movedLinear = false;
         	touchingHorizontal = touchingVertical = false;
-        	Debug.Log("Bounced by " + bounceAngle * Mathf.Rad2Deg);
         }
         if (Input.GetButtonDown("Fire1") && currentPowerType != PowerUp.Type.None)
         {
@@ -112,98 +111,38 @@ public class Player : MonoBehaviour
 		bounced = false;
 	}
 
-	private float GetBounceAngle()
+	private Vector3 GetBounceDirection()
 	{
+		int playerZ = (transform.position.z > 0) ? 1 : -1; // is player at the top or bottom of the screen?
+		int playerX = (transform.position.x > 0) ? 1 : -1; // is player on the right or left side of the screen?
+
 		if (touchingHorizontal && !touchingVertical)
 		{
-			if (transform.position.z < 0) // if player at the bottom of the screen
-			{
-				if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-				{
-					return Random.Range(-60 * Mathf.Deg2Rad, -30 * Mathf.Deg2Rad);
-				}
-				else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-				{
-					return Random.Range(30 * Mathf.Deg2Rad, 60 * Mathf.Deg2Rad);
-				}
-				else
-				{
-					return Random.Range(-10f * Mathf.Deg2Rad, 10 * Mathf.Deg2Rad);
-				}
+			if (Input.GetButton("Horizontal"))
+			{ // bounce diagonally
+				return (Input.GetAxisRaw("Horizontal") * Vector3.right * Random.Range(0.6f, 0.8f)
+						+ (Vector3.back * playerZ)).normalized;
 			}
-			else // player is at the top of the screen
-			{
-				if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-				{
-					return Random.Range(210 * Mathf.Deg2Rad, 240 * Mathf.Deg2Rad);
-				}
-				else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-				{
-					return Random.Range(120 * Mathf.Deg2Rad, 150 * Mathf.Deg2Rad);
-				}
-				else
-				{
-					return Random.Range(170 * Mathf.Deg2Rad, 190 * Mathf.Deg2Rad);
-				}
+			else
+			{ // bounce straight up
+				return ((Vector3.back * playerZ) + (Random.Range(-0.1f, 0.1f) * Vector3.right)).normalized;
 			}
 		}
 		else if (touchingVertical && !touchingHorizontal)
 		{
-			if (transform.position.x > 0) // if player at the right of the screen
-			{
-				if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
-				{
-					return Random.Range(-60 * Mathf.Deg2Rad, -30 * Mathf.Deg2Rad);
-				}
-				else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-				{
-					return Random.Range(-120 * Mathf.Deg2Rad, -150 * Mathf.Deg2Rad);
-				}
-				else
-				{
-					return Random.Range(-100 * Mathf.Deg2Rad, -80 * Mathf.Deg2Rad);
-				}
+			if (Input.GetButton("Vertical"))
+			{ // bounce diagonally
+				return (Input.GetAxisRaw("Vertical") * Vector3.forward * Random.Range(0.4f, 0.8f)
+						+ (Vector3.left * playerX)).normalized;
 			}
-			else // player is at the left of the screen
-			{
-				if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
-				{
-					return Random.Range(30 * Mathf.Deg2Rad, 60 * Mathf.Deg2Rad);
-				}
-				else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-				{
-					return Random.Range(120 * Mathf.Deg2Rad, 150 * Mathf.Deg2Rad);
-				}
-				else 
-				{
-					return Random.Range(80 * Mathf.Deg2Rad, 100 * Mathf.Deg2Rad); 
-				}				
+			else
+			{ // bounce straight right/left
+				return ((Vector3.left * playerX) + (Random.Range(-0.1f, 0.1f) * Vector3.forward)).normalized;
 			}
 		}
 		else // i.e. the player is at a corner, touching both a vertical and horizontal wall at the same time
 		{
-			if (transform.position.x < 0)
-			{
-				if (transform.position.z < 0) // player at bottom left
-				{
-					return 30 * Mathf.Deg2Rad;
-				}
-				else // player at top left
-				{
-					return 120 * Mathf.Deg2Rad;
-				}
-			}
-			else
-			{
-				if (transform.position.z < 0) // player at bottom right
-				{
-					return -30 * Mathf.Deg2Rad;
-				}
-				else // player at top right
-				{
-					return -120 * Mathf.Deg2Rad;
-				}
-			}
+			return ((Vector3.back * playerZ) + (Vector3.left * playerX)).normalized;
 		}
 	}
 
