@@ -46,36 +46,22 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-		if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && touchingHorizontal)
+		if (Input.GetButton("Horizontal") && touchingHorizontal)
         {
-            transform.position += -Vector3.right * Speed * Time.deltaTime;
+            transform.position += Input.GetAxisRaw("Horizontal") * Vector3.right * Speed * Time.deltaTime;
 			if (transform.position.x != leftBound && transform.position.x != rightBound) touchingVertical = false;
             movedLinear = true;
             bounced = false;
         }
-		else if ((Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) && touchingHorizontal)
+		else if (Input.GetButton("Vertical")  && touchingVertical)
         {
-            transform.position += Vector3.right * Speed * Time.deltaTime;
-			if (transform.position.x != leftBound && transform.position.x != rightBound) touchingVertical = false;
-            movedLinear = true;
-            bounced = false;
-        }
-		else if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))  && touchingVertical)
-        {
-            transform.position += Vector3.forward * Speed * Time.deltaTime;
-			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
-            movedLinear = true;
-            bounced = false;
-        }
-		else if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) && touchingVertical)
-        {
-            transform.position += -Vector3.forward * Speed * Time.deltaTime;
+            transform.position += Input.GetAxisRaw("Vertical") * Vector3.forward * Speed * Time.deltaTime;
 			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
             movedLinear = true;
             bounced = false;
         }
 
-        if (Input.GetKey(KeyCode.Space) && (touchingVertical || touchingHorizontal))
+        if (Input.GetButton("Bounce") && (touchingVertical || touchingHorizontal))
         {
         	mBody.constraints = RigidbodyConstraints.FreezePositionY;
         	mBody.isKinematic = false;
@@ -87,11 +73,11 @@ public class Player : MonoBehaviour
         	touchingHorizontal = touchingVertical = false;
         	Debug.Log("Bounced by " + bounceAngle * Mathf.Rad2Deg);
         }
-        if (Input.GetKeyDown(KeyCode.LeftShift) && currentPowerType != PowerUp.Type.None)
+        if (Input.GetButtonDown("Fire1") && currentPowerType != PowerUp.Type.None)
         {
         	ActivatePowerUp();
         }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
+        if (Input.GetButtonUp("Fire1"))
         {
         	DeactivatePowerUp();
         }
@@ -304,42 +290,14 @@ public class Player : MonoBehaviour
 		Vector3 firePos = new Vector3(transform.position.x, 0.5f, transform.position.z);
 		GameObject shot = Instantiate(projectile, firePos, Quaternion.identity) as GameObject;
 		Rigidbody fireBody = shot.GetComponent<Rigidbody>();
-		if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-		{
-			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-			{ // shoot southwest
-				fireBody.velocity = projectileSpeed * (Vector3.back + Vector3.left).normalized;
-			}
-			else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-			{ // shoot southeast
-				fireBody.velocity = projectileSpeed * (Vector3.back + Vector3.right).normalized;
-			}
-			else fireBody.velocity = Vector3.back * projectileSpeed; // shoot downwards
-		}
-		else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
-		{
-			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-			{ // shoot northwest
-				fireBody.velocity = projectileSpeed * (Vector3.forward + Vector3.left).normalized;
-			}
-			else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-			{ // shoot northeast
-				fireBody.velocity = projectileSpeed * (Vector3.forward + Vector3.right).normalized;
-			}
-			else fireBody.velocity = Vector3.forward * projectileSpeed; // shoot upwards
-
-		}
-		else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-		{
-			fireBody.velocity = Vector3.left * projectileSpeed; // shoot left
-		}
-		else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-		{
-			fireBody.velocity = Vector3.right * projectileSpeed; // shoot right
+		if (Input.GetButton("Horizontal") || Input.GetButton("Vertical"))
+		{ // shoot in direction indicated by input direction
+			fireBody.velocity = projectileSpeed * ((Input.GetAxis("Vertical") * Vector3.forward)
+			+ (Input.GetAxis("Horizontal") * Vector3.right).normalized);
 		}
 		else
-		{
-			fireBody.velocity = mBody.velocity.normalized * projectileSpeed; // shoot in the direction of player travel
+		{ // shoot in the direction of player travel
+			fireBody.velocity = mBody.velocity.normalized * projectileSpeed;
 		}
 	}
 
