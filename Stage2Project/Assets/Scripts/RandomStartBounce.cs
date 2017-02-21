@@ -14,13 +14,12 @@ public class RandomStartBounce : MonoBehaviour {
 
 	void Start ()
 	{
-		float angle = Random.Range(0, 2 * Mathf.PI);
-		mBody.AddForce(new Vector3(startForce * Mathf.Sin(angle), 0, startForce * Mathf.Cos(angle)));
+		BounceRandom();
 	}
 
-	void BounceRandom()
+	public void BounceRandom()
 	{
 		float angle = Random.Range(0, 2 * Mathf.PI);
-		mBody.AddForce(new Vector3(startForce * Mathf.Sin(angle), 0, startForce * Mathf.Cos(angle)));
+		mBody.AddForce(new Vector3(startForce * Mathf.Cos(angle), 0, startForce * Mathf.Sin(angle)));
 	}
 }

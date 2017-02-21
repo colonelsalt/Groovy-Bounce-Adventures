@@ -199,7 +199,7 @@ public class Player : MonoBehaviour
 		{
 			Debug.Log("Powerup activating!");
 			powerUpActive = true;
-			powerUpTimer = 10f;
+			powerUpTimer = 20f;
 		}
 		switch (currentPowerType)
 		{

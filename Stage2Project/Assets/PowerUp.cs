@@ -15,12 +15,11 @@ public class PowerUp : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		type = Type.Gun;
+		type = Type.Hammer;
 	}
 	
 	void OnTriggerEnter(Collider col)
 	{
-		Debug.Log("PowerUp trigger with " + col.gameObject.tag);
 		if (col.gameObject.tag == "Player")
 		{
 			Player player = col.gameObject.GetComponent<Player>();
