@@ -7,13 +7,20 @@ public class Enemy : MonoBehaviour {
 	public int Damage;
 	public int ScoreValue;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	void OnParticleTrigger()
+	private Score score;
+
+	void Awake()
 	{
-		Destroy(gameObject);
+		score = FindObjectOfType<Score>();
 	}
+
+	void OnParticleCollision(GameObject particle)
+	{
+		if (particle.tag == "Explosion")
+		{
+			Destroy(gameObject);
+			score.IncrementScore(ScoreValue);
+		}
+	}
+
 }

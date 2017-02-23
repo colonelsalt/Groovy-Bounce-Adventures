@@ -9,19 +9,21 @@ public class Player : MonoBehaviour
     public float Speed;
     public float bounceFactor, velocityBoost, floatDistance;
     public float projectileSpeed;
-	public bool touchingHorizontal, touchingVertical, movedLinear, bounced;
+	public bool touchingHorizontal, touchingVertical;
 	public int health;
-	public GameObject projectile;
+	public GameObject projectilePrefab;
+	public GameObject crosshairPrefab;
 	public PowerUp.Type currentPowerType;
 
     private Rigidbody mBody;
     private Renderer renderer;
-	private Vector3 directionForce;
 	private PowerUpTimer timerDisplay;
 	private float leftBound, rightBound, bottomBound, topBound;
 	private HealthCounter healthCounter;
 	private bool powerUpActive;
 	private float powerUpTimer;
+	private PowerUp.Type[] powerUps;
+	private Vector3 preFreezeVelocity;
 
 	// TODO: remove this simplified fix for changing colours
 	private Color defaultColour;
@@ -34,8 +36,9 @@ public class Player : MonoBehaviour
 		topBound = (Arena.Height / 2) - HorizontalWall.Height;
 
     	touchingHorizontal = true;
-    	touchingVertical = movedLinear = bounced = false;
+    	touchingVertical = powerUpActive = false;
     	currentPowerType = PowerUp.Type.None;
+    	powerUps = new PowerUp.Type[3];
 
         mBody = GetComponent<Rigidbody>();
         healthCounter = FindObjectOfType<HealthCounter>();
@@ -50,15 +53,11 @@ public class Player : MonoBehaviour
         {
             transform.position += Input.GetAxisRaw("Horizontal") * Vector3.right * Speed * Time.deltaTime;
 			if (transform.position.x != leftBound && transform.position.x != rightBound) touchingVertical = false;
-            movedLinear = true;
-            bounced = false;
         }
 		else if (Input.GetButton("Vertical")  && touchingVertical)
         {
             transform.position += Input.GetAxisRaw("Vertical") * Vector3.forward * Speed * Time.deltaTime;
 			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
-            movedLinear = true;
-            bounced = false;
         }
 
         if (Input.GetButton("Bounce") && (touchingVertical || touchingHorizontal))
@@ -67,23 +66,38 @@ public class Player : MonoBehaviour
         	mBody.isKinematic = false;
 			Vector3 bounceDirection = GetBounceDirection();
 			mBody.velocity = velocityBoost * bounceDirection;
-			directionForce = bounceFactor * bounceDirection;
-        	bounced = true;
-        	movedLinear = false;
+			mBody.AddForce(bounceFactor * bounceDirection * Time.deltaTime);
         	touchingHorizontal = touchingVertical = false;
         }
-        if (Input.GetButtonDown("Fire1") && currentPowerType != PowerUp.Type.None)
-        {
-        	ActivatePowerUp();
-        }
-        if (Input.GetButtonUp("Fire1"))
-        {
-        	DeactivatePowerUp();
-        }
+		if (Input.GetButtonDown("Fire1") && currentPowerType != PowerUp.Type.None)
+		{
+			if (!powerUpActive) StartPowerUp();
+			switch (currentPowerType)
+			{
+				// TODO: make a neater/flashier graphical effect for these powerups:
+				case PowerUp.Type.Hammer:
+					renderer.material.color = Color.magenta;
+					break;
+				case PowerUp.Type.Gun:
+					renderer.material.color = Color.cyan;
+					InvokeRepeating("FireGun", 0.0000000001f, 0.25f);
+					break;
+				case PowerUp.Type.Shield:
+					renderer.material.color = Color.red;
+					break;
+				case PowerUp.Type.Bomb:
+					FireBomb();
+					currentPowerType = PowerUp.Type.None;
+					break;
+			}
+		}
+		else if (Input.GetButtonUp("Fire1"))
+		{
+			if (currentPowerType != PowerUp.Type.Shield) renderer.material.color = defaultColour;
+			if (currentPowerType == PowerUp.Type.Gun) CancelInvoke("FireGun");
+		}
 
-        if (bounced) mBody.AddForce(directionForce * Speed * Time.deltaTime);
-        if (powerUpActive) CheckPowerUp();
-
+        if (powerUpActive) CheckPowerUps();
 		ClampToPlaySpace();
     }
 
@@ -91,12 +105,12 @@ public class Player : MonoBehaviour
     {
     	if (col.gameObject.tag == "Enemy")
     	{
-    		if (!powerUpActive)
+    		if (!powerUpActive || currentPowerType == PowerUp.Type.Gun)
     		{
     			Enemy enemy = col.gameObject.GetComponent<Enemy>();
     			TakeDamage(enemy.Damage);
     		}
-    		else if (Input.GetKey(KeyCode.LeftShift) && currentPowerType == PowerUp.Type.Hammer)
+    		else if (Input.GetButton("Fire1") && currentPowerType == PowerUp.Type.Hammer)
     		{
     			Destroy(col.gameObject);
     		}
@@ -108,7 +122,17 @@ public class Player : MonoBehaviour
 		mBody.isKinematic = true;
 		mBody.constraints = RigidbodyConstraints.FreezeAll;
 		mBody.velocity = Vector3.zero;
-		bounced = false;
+	}
+
+	public void ResumeMovement()
+	{
+		Debug.Log("Restoring velocity " + preFreezeVelocity);
+		if (preFreezeVelocity.magnitude > 0)
+		{
+			mBody.constraints = RigidbodyConstraints.FreezePositionY;
+			mBody.isKinematic = false;
+			mBody.velocity = preFreezeVelocity;
+		}
 	}
 
 	private Vector3 GetBounceDirection()
@@ -190,44 +214,38 @@ public class Player : MonoBehaviour
 
 	public void SetPowerUp(PowerUp.Type type)
 	{
+		Debug.Log("Setting powerup to " + type);
 		currentPowerType = type;
 	}
 
-	private void ActivatePowerUp()
+	private void CheckPowerUps()
 	{
-		if (!powerUpActive)
+		powerUpTimer -= Time.deltaTime;
+		Debug.Log("Powerup timer currently at " + powerUpTimer);
+		timerDisplay.UpdateDisplay(powerUpTimer);
+		if (powerUpTimer <= 0f)
+		{
+			powerUpActive = false;
+			renderer.material.color = defaultColour;
+			currentPowerType = PowerUp.Type.None;
+			CancelInvoke("FireGun");
+		}
+	}
+
+	private void StartPowerUp()
+	{
+		if (currentPowerType != PowerUp.Type.Bomb)
 		{
 			Debug.Log("Powerup activating!");
 			powerUpActive = true;
 			powerUpTimer = 20f;
-		}
-		switch (currentPowerType)
-		{
-			// TODO: make a neater/flashier graphical effect for these powerups:
-			case PowerUp.Type.Hammer:
-				renderer.material.color = Color.magenta;
-				break;
-			case PowerUp.Type.Gun:
-				renderer.material.color = Color.cyan;
-				InvokeRepeating("FireGun", 0.0000000001f, 0.25f);
-				break;
-		}
-	}
-
-	private void DeactivatePowerUp()
-	{
-		// TODO: make powerup-deactivation animation neater/flashier
-		renderer.material.color = defaultColour;
-		if (currentPowerType == PowerUp.Type.Gun)
-		{
-			CancelInvoke("FireGun");
 		}
 	}
 
 	private void FireGun()
 	{
 		Vector3 firePos = new Vector3(transform.position.x, 0.5f, transform.position.z);
-		GameObject shot = Instantiate(projectile, firePos, Quaternion.identity) as GameObject;
+		GameObject shot = Instantiate(projectilePrefab, firePos, Quaternion.identity) as GameObject;
 		Rigidbody fireBody = shot.GetComponent<Rigidbody>();
 		if (Input.GetButton("Horizontal") || Input.GetButton("Vertical"))
 		{ // shoot in direction indicated by input direction
@@ -240,18 +258,13 @@ public class Player : MonoBehaviour
 		}
 	}
 
-	private void CheckPowerUp()
+	private void FireBomb()
 	{
-		powerUpTimer -= Time.deltaTime;
-		Debug.Log("Powerup timer currently at " + powerUpTimer);
-		timerDisplay.UpdateDisplay(powerUpTimer);
-		if (powerUpTimer <= 0f)
-		{
-			powerUpActive = false;
-			renderer.material.color = defaultColour;
-			currentPowerType = PowerUp.Type.None;
-			CancelInvoke("FireGun");
-		}
+		preFreezeVelocity = mBody.velocity;
+		Debug.Log("Saving velocity: " + preFreezeVelocity);
+		FreezePosition();
+		GameObject crosshairs = Instantiate(crosshairPrefab) as GameObject;
+
 	}
 }
 

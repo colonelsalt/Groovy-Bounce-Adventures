@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Food : MonoBehaviour {
 
+	public int health;
 	public int ScoreValue;
 	public float bounceFactor;
 
@@ -25,12 +26,30 @@ public class Food : MonoBehaviour {
 			{
 				Vector3 bounceDirection = -(col.contacts[0].point - transform.position).normalized;
 				mBody.AddForce(bounceDirection * bounceFactor);
+				health--;
 			}
 			else
 			{
 				score.IncrementScore(ScoreValue);
 				Destroy(gameObject);
 			}
+		}
+		else if (col.gameObject.tag == "Horizontal wall" || col.gameObject.tag == "Vertical wall")
+		{
+			health--;
+		}
+		if (health <= 0)
+		{
+			Debug.Log("Food died!");
+			Destroy(gameObject);
+		}
+	}
+
+	void OnParticleCollision(GameObject particle)
+	{
+		if (particle.tag == "Explosion")
+		{
+			Destroy(gameObject);
 		}
 	}
 }

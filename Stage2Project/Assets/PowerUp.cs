@@ -14,8 +14,9 @@ public class PowerUp : MonoBehaviour {
 	private Type type;
 
 	// Use this for initialization
-	void Start () {
-		type = Type.Hammer;
+	void Start ()
+	{
+		type = Type.Bomb;
 	}
 	
 	void OnTriggerEnter(Collider col)

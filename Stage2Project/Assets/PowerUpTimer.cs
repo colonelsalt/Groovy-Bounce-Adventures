@@ -18,4 +18,9 @@ public class PowerUpTimer : MonoBehaviour {
 		if (remainingTime > 0) text.text = "Powerup time: \n" + remainingTime.ToString();
 		else text.text = "";
 	}
+
+	public void ResetDisplay()
+	{
+		text.text = "";
+	}
 }
