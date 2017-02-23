@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         Arena.Calculate();
-        //mPlayer.enabled = false;
+        mPlayer.enabled = false;
         mState = State.Paused;
     }
 
@@ -63,6 +63,7 @@ public class GameManager : MonoBehaviour
 
     private void BeginNewGame()
     {
+    	Debug.Log("Beginning new game!");
         if (mObjects != null)
         {
             for (int count = 0; count < mObjects.Count; ++count)

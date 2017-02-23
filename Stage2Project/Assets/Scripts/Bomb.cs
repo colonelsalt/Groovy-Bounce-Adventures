@@ -53,7 +53,7 @@ public class Bomb : MonoBehaviour {
 	private void SlowDownTime()
 	{
 		// TODO: add motion blur + black and white camera effect here
-		Time.timeScale = 0.02f;
+		Time.timeScale = 0.04f;
 		Time.fixedDeltaTime = 0.02f * Time.timeScale;
 		timer = 0f;
 	}

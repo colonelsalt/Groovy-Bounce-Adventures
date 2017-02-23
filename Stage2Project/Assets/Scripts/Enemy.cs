@@ -18,8 +18,8 @@ public class Enemy : MonoBehaviour {
 	{
 		if (particle.tag == "Explosion")
 		{
-			Destroy(gameObject);
 			score.IncrementScore(ScoreValue);
+			Destroy(gameObject);
 		}
 	}
 

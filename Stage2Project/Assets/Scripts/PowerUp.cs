@@ -16,7 +16,7 @@ public class PowerUp : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
 	{
-		type = Type.Bomb;
+		type = (Type) Random.Range((int)Type.Hammer, (int)Type.Bomb + 1);
 	}
 	
 	void OnTriggerEnter(Collider col)
@@ -24,7 +24,7 @@ public class PowerUp : MonoBehaviour {
 		if (col.gameObject.tag == "Player")
 		{
 			Player player = col.gameObject.GetComponent<Player>();
-			player.SetPowerUp(type);
+			player.AddPowerUp(type);
 			Destroy(gameObject);
 		}
 	}
