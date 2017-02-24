@@ -12,6 +12,7 @@ public class PowerUp : MonoBehaviour {
 		-Gun lets you fire projectiles (in direction indicated by arrow keys) that kills enemies in path.
 	*/
 	private Type type;
+	private bool isColliding = false;
 
 	// Use this for initialization
 	void Start ()
@@ -21,8 +22,10 @@ public class PowerUp : MonoBehaviour {
 	
 	void OnTriggerEnter(Collider col)
 	{
-		if (col.gameObject.tag == "Player")
+		if (col.gameObject.tag == "Player" && !isColliding)
 		{
+			isColliding = true;
+			Debug.Log("PowerUp's OnTriggerEnter called!");
 			Player player = col.gameObject.GetComponent<Player>();
 			player.AddPowerUp(type);
 			Destroy(gameObject);

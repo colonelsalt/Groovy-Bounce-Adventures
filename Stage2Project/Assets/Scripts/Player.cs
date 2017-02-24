@@ -74,7 +74,7 @@ public class Player : MonoBehaviour
 			mBody.AddForce(bounceFactor * bounceDirection * Time.deltaTime);
         	touchingHorizontal = touchingVertical = false;
         }
-		if (Input.GetButtonDown("Fire1") && currentPowerType != PowerUp.Type.None)
+		if (Input.GetButtonDown("Fire1") && powerUps[powerIndex] != PowerUp.Type.None)
 		{
 			if (!powerUpActive) StartPowerUp();
 			switch (currentPowerType)
@@ -84,6 +84,7 @@ public class Player : MonoBehaviour
 					renderer.material.color = Color.magenta;
 					break;
 				case PowerUp.Type.Gun:
+					preFreezeVelocity = mBody.velocity;
 					mBody.velocity /= 4;
 					renderer.material.color = Color.cyan;
 					InvokeRepeating("FireGun", 0.0000000001f, 0.25f);
@@ -102,7 +103,12 @@ public class Player : MonoBehaviour
 			if (currentPowerType == PowerUp.Type.Gun)
 			{
 				CancelInvoke("FireGun");
-				mBody.velocity *= 4;
+				if (mBody.velocity.magnitude > 0)
+				{
+					mBody.velocity = preFreezeVelocity;
+					preFreezeVelocity = Vector3.zero;
+				}
+
 			}
 		}
 
@@ -219,11 +225,8 @@ public class Player : MonoBehaviour
 
 	public void AddPowerUp(PowerUp.Type type)
 	{
-		if (numPowerUps < 3)
-		{
-			if (numPowerUps == 0) currentPowerType = type;
-			powerUps[numPowerUps++] = type;
-		}
+		Debug.Log("AddPowerUp called!");
+		if (numPowerUps < 3) powerUps[numPowerUps++] = type;
 	}
 
 	private void CheckPowerUps()
@@ -253,7 +256,6 @@ public class Player : MonoBehaviour
 
 	private void RearrangeInventory()
 	{
-		Debug.Log("Before rearranging: number of powerups is " + numPowerUps + "; powerIndex is " + powerIndex);
 		powerUps[powerIndex] = PowerUp.Type.None;
 		for (int i = 1; i < powerUps.Length; i++)
 		{
@@ -267,8 +269,6 @@ public class Player : MonoBehaviour
 		{
 			powerIndex = (powerIndex >= numPowerUps) ? powerIndex - 1 : powerIndex;
 		}
-
-		Debug.Log("After rearranging: number of powerups is " + numPowerUps + "; powerIndex is " + powerIndex);
 	}
 
 	private void FireGun()
