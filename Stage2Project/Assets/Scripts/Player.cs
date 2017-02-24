@@ -244,6 +244,7 @@ public class Player : MonoBehaviour
 		if (currentPowerType != PowerUp.Type.Bomb)
 		{
 			Debug.Log("Powerup activating!");
+			currentPowerType = powerUps[powerIndex];
 			powerUpActive = true;
 			powerUpTimer = 8f;
 			RearrangeInventory();
@@ -252,14 +253,22 @@ public class Player : MonoBehaviour
 
 	private void RearrangeInventory()
 	{
-		for (int i = 1; i < numPowerUps; i++)
+		Debug.Log("Before rearranging: number of powerups is " + numPowerUps + "; powerIndex is " + powerIndex);
+		powerUps[powerIndex] = PowerUp.Type.None;
+		for (int i = 1; i < powerUps.Length; i++)
 		{
-			if (powerUps[i - 1] == PowerUp.Type.None) powerUps[i - 1] = powerUps[i];
+			if (powerUps[i - 1] == PowerUp.Type.None)
+			{
+				powerUps[i - 1] = powerUps[i];
+				powerUps[i] = PowerUp.Type.None;
+			}
 		}
-		powerUps[numPowerUps] = PowerUp.Type.None;
-		if (numPowerUps > 0) numPowerUps--;
-		powerIndex = (powerIndex > numPowerUps - 1) ? powerIndex - 1 : powerIndex;
-		Debug.Log("Number of powerups is " + numPowerUps + "; powerIndex is " + powerIndex);
+		if (--numPowerUps > 0)
+		{
+			powerIndex = (powerIndex >= numPowerUps) ? powerIndex - 1 : powerIndex;
+		}
+
+		Debug.Log("After rearranging: number of powerups is " + numPowerUps + "; powerIndex is " + powerIndex);
 	}
 
 	private void FireGun()
