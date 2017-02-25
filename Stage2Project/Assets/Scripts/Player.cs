@@ -128,7 +128,6 @@ public class Player : MonoBehaviour
 
 			}
 		}
-
         if (powerUpActive) CheckPowerUps();
         inventory.UpdateDisplay();
 		ClampToPlaySpace();
@@ -222,6 +221,12 @@ public class Player : MonoBehaviour
 	{
 		health -= amount;
 		healthCounter.UpdateDisplay();
+		if (health <= 0)
+		{
+			// TODO: explosion animation here
+			ScreenManager sm = FindObjectOfType<ScreenManager>();
+			sm.EndGame();
+		}
 	}
 
 	public void AddPowerUp(PowerUp.Type type)
