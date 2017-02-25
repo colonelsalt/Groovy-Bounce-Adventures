@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour {
 
-	private Player player;
 	private Score score;
 
 	void Awake()
@@ -24,6 +23,10 @@ public class Projectile : MonoBehaviour {
 			score.IncrementScore(enemy.ScoreValue);
 			Destroy(col.gameObject);
 			Destroy(gameObject);
+		}
+		else if (col.gameObject.tag == "Food")
+		{
+			Destroy(col.gameObject);
 		}
 	}
 }

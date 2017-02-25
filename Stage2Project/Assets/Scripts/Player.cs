@@ -74,6 +74,23 @@ public class Player : MonoBehaviour
 			mBody.AddForce(bounceFactor * bounceDirection * Time.deltaTime);
         	touchingHorizontal = touchingVertical = false;
         }
+
+        if (Input.GetButton("Select1"))
+        {
+			powerIndex = 0;
+			if (!powerUpActive) currentPowerType = powerUps[powerIndex];
+        }	
+        else if (Input.GetButton("Select2") && numPowerUps > 1)
+        {
+        	powerIndex = 1;
+			if (!powerUpActive) currentPowerType = powerUps[powerIndex];
+		}
+        else if (Input.GetButton("Select3") && numPowerUps > 2)
+        {
+        	powerIndex = 2;
+			if (!powerUpActive) currentPowerType = powerUps[powerIndex];
+		}
+
 		if (Input.GetButtonDown("Fire1") && powerUps[powerIndex] != PowerUp.Type.None)
 		{
 			if (!powerUpActive) StartPowerUp();
@@ -115,22 +132,6 @@ public class Player : MonoBehaviour
         if (powerUpActive) CheckPowerUps();
         inventory.UpdateDisplay();
 		ClampToPlaySpace();
-    }
-
-    void OnCollisionEnter(Collision col)
-    {
-    	if (col.gameObject.tag == "Enemy")
-    	{
-    		if (!powerUpActive || currentPowerType == PowerUp.Type.Gun)
-    		{
-    			Enemy enemy = col.gameObject.GetComponent<Enemy>();
-    			TakeDamage(enemy.Damage);
-    		}
-    		else if (Input.GetButton("Fire1") && currentPowerType == PowerUp.Type.Hammer)
-    		{
-    			Destroy(col.gameObject);
-    		}
-    	}
     }
 
 	private void FreezePosition()
@@ -247,7 +248,6 @@ public class Player : MonoBehaviour
 		if (currentPowerType != PowerUp.Type.Bomb)
 		{
 			Debug.Log("Powerup activating!");
-			currentPowerType = powerUps[powerIndex];
 			powerUpActive = true;
 			powerUpTimer = 8f;
 			RearrangeInventory();
@@ -256,6 +256,7 @@ public class Player : MonoBehaviour
 
 	private void RearrangeInventory()
 	{
+		currentPowerType = powerUps[powerIndex];
 		powerUps[powerIndex] = PowerUp.Type.None;
 		for (int i = 1; i < powerUps.Length; i++)
 		{
