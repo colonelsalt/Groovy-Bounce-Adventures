@@ -28,7 +28,7 @@ public class Player : MonoBehaviour
 	private int numPowerUps;
 	public int powerIndex;
 	private Vector3 preFreezeVelocity;
-	private Quaternion defaultRotation;
+	private Quaternion bottomRotation, topRotation, leftRotation, rightRotation;
 
 	// TODO: remove this simplified fix for changing colours
 	private Color defaultColour;
@@ -46,8 +46,12 @@ public class Player : MonoBehaviour
     	powerUps = new PowerUp.Type[3];
     	numPowerUps = powerIndex = 0;
     	preFreezeVelocity = Vector3.zero;
-    	defaultRotation = Quaternion.Euler(-228, -288, 90);
-		transform.rotation = defaultRotation;
+    	bottomRotation = Quaternion.Euler(-41, -84, 75);
+    	topRotation = Quaternion.Euler(-43, 105, 59);
+    	leftRotation = Quaternion.Euler(-43, 16, 59);
+    	rightRotation = Quaternion.Euler(-41, 198, 57);
+
+		transform.rotation = bottomRotation;
 
         mBody = GetComponent<Rigidbody>();
         healthCounter = FindObjectOfType<HealthCounter>();
@@ -196,7 +200,7 @@ public class Player : MonoBehaviour
 	{
 		if (transform.position.x < leftBound)
 		{
-			transform.rotation = defaultRotation;
+			transform.rotation = leftRotation;
 			touchingVertical = true;
 			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
 			transform.position = new Vector3(leftBound + floatDistance, 0.5f, transform.position.z);
@@ -204,7 +208,7 @@ public class Player : MonoBehaviour
 		}
 		else if (transform.position.x > rightBound)
 		{
-			transform.rotation = defaultRotation;
+			transform.rotation = rightRotation;
 			touchingVertical = true;
 			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
 			transform.position = new Vector3(rightBound - floatDistance, 0.5f, transform.position.z);
@@ -212,7 +216,7 @@ public class Player : MonoBehaviour
 		}
 		else if (transform.position.z < bottomBound)
 		{
-			transform.rotation = defaultRotation;
+			transform.rotation = bottomRotation;
 			touchingHorizontal = true;
 			if (transform.position.z != leftBound && transform.position.z != rightBound) touchingVertical = false;
 			transform.position = new Vector3(transform.position.x + floatDistance, 0.5f, bottomBound);
@@ -220,7 +224,7 @@ public class Player : MonoBehaviour
 		}
 		else if (transform.position.z > topBound)
 		{
-			transform.rotation = defaultRotation;
+			transform.rotation = topRotation;
 			touchingHorizontal = true;
 			if (transform.position.z != leftBound && transform.position.z != rightBound) touchingVertical = false;
 			transform.position = new Vector3(transform.position.x + floatDistance, 0.5f, topBound);
