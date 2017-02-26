@@ -47,9 +47,6 @@ public class Food : MonoBehaviour {
 
 	void OnParticleCollision(GameObject particle)
 	{
-		if (particle.tag == "Explosion")
-		{
-			Destroy(gameObject);
-		}
+		if (particle.tag == "Explosion") Destroy(gameObject);
 	}
 }

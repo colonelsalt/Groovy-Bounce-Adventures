@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     public float projectileSpeed;
 	public bool touchingHorizontal, touchingVertical;
 	public int health;
+	public int MAXHEALTH;
 	public GameObject projectilePrefab;
 	public GameObject crosshairPrefab;
 	public PowerUp.Type currentPowerType;
@@ -27,6 +28,7 @@ public class Player : MonoBehaviour
 	private int numPowerUps;
 	public int powerIndex;
 	private Vector3 preFreezeVelocity;
+	private Quaternion defaultRotation;
 
 	// TODO: remove this simplified fix for changing colours
 	private Color defaultColour;
@@ -43,13 +45,16 @@ public class Player : MonoBehaviour
     	currentPowerType = PowerUp.Type.None;
     	powerUps = new PowerUp.Type[3];
     	numPowerUps = powerIndex = 0;
+    	preFreezeVelocity = Vector3.zero;
+    	defaultRotation = Quaternion.Euler(-228, -288, 90);
+		transform.rotation = defaultRotation;
 
         mBody = GetComponent<Rigidbody>();
         healthCounter = FindObjectOfType<HealthCounter>();
         timerDisplay = FindObjectOfType<PowerUpTimer>();
         inventory = FindObjectOfType<Inventory>();
-        renderer = GetComponent<Renderer>();
-        defaultColour = renderer.material.color;
+        //renderer = GetComponent<Renderer>();
+        //defaultColour = renderer.material.color;
     }
 
     void Update()
@@ -120,17 +125,18 @@ public class Player : MonoBehaviour
 			if (currentPowerType == PowerUp.Type.Gun)
 			{
 				CancelInvoke("FireGun");
-				if (mBody.velocity.magnitude > 0)
+				if (preFreezeVelocity.magnitude > 0 && !(touchingHorizontal || touchingVertical))
 				{
 					mBody.velocity = preFreezeVelocity;
-					preFreezeVelocity = Vector3.zero;
 				}
-
+				preFreezeVelocity = Vector3.zero;
 			}
 		}
         if (powerUpActive) CheckPowerUps();
+		if (!touchingHorizontal && !touchingVertical) EnsureMinVelocity();
         inventory.UpdateDisplay();
 		ClampToPlaySpace();
+
     }
 
 	private void FreezePosition()
@@ -147,6 +153,7 @@ public class Player : MonoBehaviour
 			mBody.constraints = RigidbodyConstraints.FreezePositionY;
 			mBody.isKinematic = false;
 			mBody.velocity = preFreezeVelocity;
+			preFreezeVelocity = Vector3.zero;
 		}
 	}
 
@@ -189,13 +196,15 @@ public class Player : MonoBehaviour
 	{
 		if (transform.position.x < leftBound)
 		{
+			transform.rotation = defaultRotation;
 			touchingVertical = true;
-
+			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
 			transform.position = new Vector3(leftBound + floatDistance, 0.5f, transform.position.z);
 			FreezePosition();
 		}
 		else if (transform.position.x > rightBound)
 		{
+			transform.rotation = defaultRotation;
 			touchingVertical = true;
 			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
 			transform.position = new Vector3(rightBound - floatDistance, 0.5f, transform.position.z);
@@ -203,6 +212,7 @@ public class Player : MonoBehaviour
 		}
 		else if (transform.position.z < bottomBound)
 		{
+			transform.rotation = defaultRotation;
 			touchingHorizontal = true;
 			if (transform.position.z != leftBound && transform.position.z != rightBound) touchingVertical = false;
 			transform.position = new Vector3(transform.position.x + floatDistance, 0.5f, bottomBound);
@@ -210,11 +220,23 @@ public class Player : MonoBehaviour
 		}
 		else if (transform.position.z > topBound)
 		{
+			transform.rotation = defaultRotation;
 			touchingHorizontal = true;
 			if (transform.position.z != leftBound && transform.position.z != rightBound) touchingVertical = false;
 			transform.position = new Vector3(transform.position.x + floatDistance, 0.5f, topBound);
 			FreezePosition();
 		}
+	}
+
+	private void EnsureMinVelocity()
+	{
+		if (mBody.velocity.magnitude < 30 && preFreezeVelocity == Vector3.zero) mBody.velocity *= 2;
+		else if (mBody.velocity.magnitude == 0 && preFreezeVelocity == Vector3.zero)
+		{
+			mBody.velocity = 20 * ((Random.Range(-1f, 1f) * Vector3.forward) +
+			(Random.Range(-1f, 1f) * Vector3.right)).normalized;
+		}
+
 	}
 
 	public void TakeDamage(int amount)
@@ -232,7 +254,12 @@ public class Player : MonoBehaviour
 	public void AddPowerUp(PowerUp.Type type)
 	{
 		Debug.Log("AddPowerUp called!");
-		if (numPowerUps < 3) powerUps[numPowerUps++] = type;
+		if (numPowerUps < 3 && type != PowerUp.Type.ExtraLife) powerUps[numPowerUps++] = type;
+		else if (type == PowerUp.Type.ExtraLife && health < MAXHEALTH)
+		{
+			health++;
+			healthCounter.UpdateDisplay();
+		}
 	}
 
 	private void CheckPowerUps()

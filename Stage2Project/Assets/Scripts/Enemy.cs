@@ -25,10 +25,7 @@ public class Enemy : MonoBehaviour {
 				score.IncrementScore(ScoreValue);
 				Destroy(gameObject);
 			}
-			else
-			{
-				player.TakeDamage(Damage);
-			}
+			else player.TakeDamage(Damage);
 		}
 		else if (col.gameObject.tag == "Projectile")
 		{
@@ -46,4 +43,5 @@ public class Enemy : MonoBehaviour {
 			Destroy(gameObject);
 		}
 	}
+
 }

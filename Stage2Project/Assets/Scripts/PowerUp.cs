@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PowerUp : MonoBehaviour {
 
-	public enum Type {None, Hammer, Gun, Shield, Bomb};
+	public enum Type {None, Hammer, Gun, Shield, Bomb, ExtraLife};
 	/*
 		-Shield is one-time activated, and simply prevents you from taking damage.
 		-Hammer is activated on per-press basis (but timer starts running from first press); it prevents damages
@@ -17,7 +17,7 @@ public class PowerUp : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
 	{
-		type = (Type) Random.Range((int)Type.Hammer, (int)Type.Bomb + 1);
+		type = (Type) Random.Range((int)Type.Hammer, (int)Type.ExtraLife + 1);
 	}
 	
 	void OnTriggerEnter(Collider col)
