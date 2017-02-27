@@ -30,6 +30,7 @@ public class Food : MonoBehaviour {
 			}
 			else
 			{
+				player.IncreaseSize();
 				score.IncrementScore(ScoreValue);
 				Destroy(gameObject);
 			}

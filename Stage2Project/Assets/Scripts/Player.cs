@@ -161,6 +161,11 @@ public class Player : MonoBehaviour
 		}
 	}
 
+	public void IncreaseSize()
+	{
+		transform.localScale = transform.localScale * 1.02f;
+	}
+
 	private Vector3 GetBounceDirection()
 	{
 		int playerZ = (transform.position.z > 0) ? 1 : -1; // is player at the top or bottom of the screen?
@@ -198,36 +203,40 @@ public class Player : MonoBehaviour
 
 	private void ClampToPlaySpace()
 	{
-		if (transform.position.x < leftBound)
+		if (transform.position.x - (transform.localScale.x / 2) < leftBound)
 		{
 			transform.rotation = leftRotation;
 			touchingVertical = true;
 			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
-			transform.position = new Vector3(leftBound + floatDistance, 0.5f, transform.position.z);
+			transform.position = new Vector3(leftBound + (transform.localScale.x / 2) + floatDistance, 3f,
+								transform.position.z);
 			FreezePosition();
 		}
-		else if (transform.position.x > rightBound)
+		else if (transform.position.x + (transform.localScale.x / 2) > rightBound)
 		{
 			transform.rotation = rightRotation;
 			touchingVertical = true;
 			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
-			transform.position = new Vector3(rightBound - floatDistance, 0.5f, transform.position.z);
+			transform.position = new Vector3(rightBound - (transform.localScale.x / 2) - floatDistance, 3f,
+								transform.position.z);
 			FreezePosition();
 		}
-		else if (transform.position.z < bottomBound)
+		else if (transform.position.z - (transform.localScale.z / 2) < bottomBound)
 		{
 			transform.rotation = bottomRotation;
 			touchingHorizontal = true;
 			if (transform.position.z != leftBound && transform.position.z != rightBound) touchingVertical = false;
-			transform.position = new Vector3(transform.position.x + floatDistance, 0.5f, bottomBound);
+			transform.position = new Vector3(transform.position.x, 3f,
+								bottomBound + (transform.localScale.z / 2) + floatDistance);
 			FreezePosition();
 		}
-		else if (transform.position.z > topBound)
+		else if (transform.position.z + (transform.localScale.z / 2) > topBound)
 		{
 			transform.rotation = topRotation;
 			touchingHorizontal = true;
 			if (transform.position.z != leftBound && transform.position.z != rightBound) touchingVertical = false;
-			transform.position = new Vector3(transform.position.x + floatDistance, 0.5f, topBound);
+			transform.position = new Vector3(transform.position.x, 3f,
+								topBound - (transform.localScale.z / 2) - floatDistance);
 			FreezePosition();
 		}
 	}

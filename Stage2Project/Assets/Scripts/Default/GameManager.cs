@@ -63,7 +63,6 @@ public class GameManager : MonoBehaviour
 
     private void BeginNewGame()
     {
-    	Debug.Log("Beginning new game!");
         if (mObjects != null)
         {
             for (int count = 0; count < mObjects.Count; ++count)
@@ -73,7 +72,7 @@ public class GameManager : MonoBehaviour
             mObjects.Clear();
         }
 
-        mPlayer.transform.position = new Vector3(4.5f, 0.5f, -55f); // TODO: change this to something not hardcoded
+        mPlayer.transform.position = new Vector3(4.5f, 3f, -55f); // TODO: change this to something not hardcoded
 
         mNextSpawn = TimeBetweenSpawns;
         mPlayer.enabled = true;
