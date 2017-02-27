@@ -10,6 +10,6 @@ public class RandomStartPosition : MonoBehaviour
         float hh = Arena.Height * 0.5f;
         float x = Random.Range( -hw, hw );
         float z = Random.Range(-hh, hh);
-        transform.position = new Vector3(x, 0.5f, z);
+        transform.position = new Vector3(x, 3f, z);
     }
 }

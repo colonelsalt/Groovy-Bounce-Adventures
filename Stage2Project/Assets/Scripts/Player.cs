@@ -106,7 +106,7 @@ public class Player : MonoBehaviour
 			switch (currentPowerType)
 			{
 				// TODO: make a neater/flashier graphical effect for these powerups:
-				case PowerUp.Type.Hammer:
+				case PowerUp.Type.Star:
 					renderer.material.color = Color.magenta;
 					break;
 				case PowerUp.Type.Gun:

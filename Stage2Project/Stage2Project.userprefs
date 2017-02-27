@@ -1,15 +1,19 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Food.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\PowerUpSpawner.cs">
     <Files>
-      <File FileName="Assets\Scripts\WrapPosition.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\RandomStartPosition.cs" Line="10" Column="40" />
-      <File FileName="Assets\Scripts\GameManager.cs" Line="40" Column="6" />
-      <File FileName="Assets\Scripts\ScreenManager.cs" Line="16" Column="17" />
-      <File FileName="Assets\Scripts\Player.cs" Line="208" Column="33" />
-      <File FileName="Assets\Scripts\Arena.cs" Line="17" Column="36" />
-      <File FileName="Assets\Scripts\MagnetizedByPlayer.cs" Line="25" Column="9" />
-      <File FileName="Assets\Food.cs" Line="44" Column="1" />
+      <File FileName="Assets\Scripts\Player.cs" Line="227" Column="28" />
+      <File FileName="Assets\Scripts\Default\GameManager.cs" Line="66" Column="39" />
+      <File FileName="Assets\Scripts\Default\ScreenManager.cs" Line="9" Column="35" />
+      <File FileName="Assets\Scripts\PowerUp.cs" Line="15" Column="2" />
+      <File FileName="Assets\Scripts\PowerUpTimer.cs" Line="24" Column="18" />
+      <File FileName="Assets\Inventory.cs" Line="15" Column="39" />
+      <File FileName="Assets\Scripts\Food.cs" Line="16" Column="37" />
+      <File FileName="Assets\Scripts\Enemy.cs" Line="46" Column="2" />
+      <File FileName="Assets\Scripts\Projectile.cs" Line="29" Column="28" />
+      <File FileName="Assets\Scripts\Bomb.cs" Line="60" Column="1" />
+      <File FileName="Assets\Scripts\FoodSpawner.cs" Line="11" Column="3" />
+      <File FileName="Assets\PowerUpSpawner.cs" Line="14" Column="3" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

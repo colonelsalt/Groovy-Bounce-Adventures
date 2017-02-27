@@ -22,7 +22,7 @@ public class Food : MonoBehaviour {
 		if (col.gameObject.tag == "Player")
 		{
 			Player player = col.gameObject.GetComponent<Player>();
-			if (player.currentPowerType == PowerUp.Type.Hammer && Input.GetButton("Fire1"))
+			if (player.currentPowerType == PowerUp.Type.Star && Input.GetButton("Fire1"))
 			{
 				Vector3 bounceDirection = -(col.contacts[0].point - transform.position).normalized;
 				mBody.AddForce(bounceDirection * bounceFactor);

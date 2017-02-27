@@ -20,7 +20,7 @@ public class Enemy : MonoBehaviour {
 	{
 		if (col.gameObject.tag == "Player" && player.currentPowerType != PowerUp.Type.Shield)
 		{
-			if (player.currentPowerType == PowerUp.Type.Hammer && Input.GetButton("Fire1"))
+			if (player.currentPowerType == PowerUp.Type.Star && Input.GetButton("Fire1"))
 			{
 				score.IncrementScore(ScoreValue);
 				Destroy(gameObject);
