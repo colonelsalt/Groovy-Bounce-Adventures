@@ -7,10 +7,12 @@ public class Score : MonoBehaviour {
 
 	public static int score = 0;
 	private Text scoreDisplay;
+	private Animator animator;
 
 	void Start()
 	{
 		scoreDisplay = GetComponent<Text>();
+		animator = GetComponent<Animator>();
 		scoreDisplay.text = score.ToString();
 	}
 	
@@ -18,5 +20,6 @@ public class Score : MonoBehaviour {
 	{
 		score += amount;
 		scoreDisplay.text = score.ToString();
+		animator.SetTrigger("RegularFlash");
 	}
 }

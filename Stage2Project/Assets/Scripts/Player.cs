@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
 	public GameObject projectilePrefab;
 	public GameObject crosshairPrefab;
 	public PowerUp.Type currentPowerType;
+	public GameObject crashTrailPrefab;
 
     private Rigidbody mBody;
     private Renderer renderer;
@@ -210,6 +211,7 @@ public class Player : MonoBehaviour
 			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
 			transform.position = new Vector3(leftBound + (transform.localScale.x / 2) + floatDistance, 3f,
 								transform.position.z);
+			if (mBody.velocity.magnitude > 0) CrashEffect();
 			FreezePosition();
 		}
 		else if (transform.position.x + (transform.localScale.x / 2) > rightBound)
@@ -219,6 +221,7 @@ public class Player : MonoBehaviour
 			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
 			transform.position = new Vector3(rightBound - (transform.localScale.x / 2) - floatDistance, 3f,
 								transform.position.z);
+			if (mBody.velocity.magnitude > 0) CrashEffect();
 			FreezePosition();
 		}
 		else if (transform.position.z - (transform.localScale.z / 2) < bottomBound)
@@ -228,6 +231,7 @@ public class Player : MonoBehaviour
 			if (transform.position.z != leftBound && transform.position.z != rightBound) touchingVertical = false;
 			transform.position = new Vector3(transform.position.x, 3f,
 								bottomBound + (transform.localScale.z / 2) + floatDistance);
+			if (mBody.velocity.magnitude > 0) CrashEffect();
 			FreezePosition();
 		}
 		else if (transform.position.z + (transform.localScale.z / 2) > topBound)
@@ -237,8 +241,29 @@ public class Player : MonoBehaviour
 			if (transform.position.z != leftBound && transform.position.z != rightBound) touchingVertical = false;
 			transform.position = new Vector3(transform.position.x, 3f,
 								topBound - (transform.localScale.z / 2) - floatDistance);
+			if (mBody.velocity.magnitude > 0) CrashEffect();
 			FreezePosition();
 		}
+	}
+
+	private void CrashEffect()
+	{
+		Vector3 crashPos = Vector3.zero;
+		Quaternion trailRotation = Quaternion.identity;
+
+		if (touchingVertical)
+		{
+			if (transform.position.x < 0) crashPos = new Vector3(-68.6f, 12f, transform.position.z);
+			else crashPos = new Vector3(67.8f, 12f, transform.position.z);
+		}
+		else if (touchingHorizontal)
+		{
+			trailRotation = Quaternion.Euler(0f, 90f, 0f);
+			if (transform.position.z < 0) crashPos = new Vector3(transform.position.x, 12f, -52.1f);
+			else crashPos = new Vector3(transform.position.x, 12f, 50.5f);
+		}
+		Debug.Log("Instantiating crash trail at " + crashPos);
+		Instantiate(crashTrailPrefab, crashPos, trailRotation);
 	}
 
 	private void EnsureMinVelocity()
@@ -255,7 +280,7 @@ public class Player : MonoBehaviour
 	public void TakeDamage(int amount)
 	{
 		health -= amount;
-		healthCounter.UpdateDisplay();
+		healthCounter.DecrementDisplay();
 		if (health <= 0)
 		{
 			// TODO: explosion animation here
@@ -271,7 +296,7 @@ public class Player : MonoBehaviour
 		else if (type == PowerUp.Type.ExtraLife && health < MAXHEALTH)
 		{
 			health++;
-			healthCounter.UpdateDisplay();
+			healthCounter.IncrementDisplay();
 		}
 	}
 

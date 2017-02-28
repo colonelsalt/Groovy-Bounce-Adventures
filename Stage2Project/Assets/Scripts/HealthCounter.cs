@@ -4,18 +4,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class HealthCounter : MonoBehaviour {
+	private int heartIndex = 0;
 
-	private Text healthDisplay;
-	private Player player;
-	// Use this for initialization
-	void Start () {
-		healthDisplay = GetComponent<Text>();
-		player = FindObjectOfType<Player>();
-		UpdateDisplay();
-	}
-	
-	public void UpdateDisplay()
+	public void DecrementDisplay()
 	{
-		healthDisplay.text = "Health: " + player.health;
+		Transform heart = transform.GetChild(heartIndex++);
+		heart.gameObject.GetComponent<RawImage>().enabled = false;
+	}
+	public void IncrementDisplay()
+	{
+		Transform heart = transform.GetChild(--heartIndex);
+		heart.gameObject.GetComponent<RawImage>().enabled = true;
 	}
 }
