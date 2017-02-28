@@ -16,6 +16,7 @@ public class Player : MonoBehaviour
 	public GameObject crosshairPrefab;
 	public PowerUp.Type currentPowerType;
 	public GameObject crashTrailPrefab;
+	public GameObject bounceTrailPrefab;
 
     private Rigidbody mBody;
     private Renderer renderer;
@@ -82,6 +83,7 @@ public class Player : MonoBehaviour
 			Vector3 bounceDirection = GetBounceDirection();
 			mBody.velocity = velocityBoost * bounceDirection;
 			mBody.AddForce(bounceFactor * bounceDirection * Time.deltaTime);
+			BounceEffect();
         	touchingHorizontal = touchingVertical = false;
         }
 
@@ -250,10 +252,9 @@ public class Player : MonoBehaviour
 	{
 		Vector3 crashPos = Vector3.zero;
 		Quaternion trailRotation = Quaternion.identity;
-
 		if (touchingVertical)
 		{
-			if (transform.position.x < 0) crashPos = new Vector3(-68.6f, 12f, transform.position.z);
+			if (transform.position.x < 0) crashPos = new Vector3(-67.6f, 12f, transform.position.z);
 			else crashPos = new Vector3(67.8f, 12f, transform.position.z);
 		}
 		else if (touchingHorizontal)
@@ -262,19 +263,35 @@ public class Player : MonoBehaviour
 			if (transform.position.z < 0) crashPos = new Vector3(transform.position.x, 12f, -52.1f);
 			else crashPos = new Vector3(transform.position.x, 12f, 50.5f);
 		}
-		Debug.Log("Instantiating crash trail at " + crashPos);
 		Instantiate(crashTrailPrefab, crashPos, trailRotation);
+	}
+
+	private void BounceEffect()
+	{
+		Vector3 bouncePos = Vector3.zero;
+		Quaternion trailRotation = Quaternion.identity;
+		if (touchingVertical)
+		{
+			if (transform.position.x < 0) bouncePos = new Vector3(-67.6f, 12f, transform.position.z);
+			else bouncePos = new Vector3(67.8f, 12f, transform.position.z);
+		}
+		else if (touchingHorizontal)
+		{
+			trailRotation = Quaternion.Euler(0f, 90f, 0f);
+			if (transform.position.z < 0) bouncePos = new Vector3(transform.position.x, 12f, -52.1f);
+			else bouncePos = new Vector3(transform.position.x, 12f, 50.5f);
+		}
+		Instantiate(bounceTrailPrefab, bouncePos, trailRotation);
 	}
 
 	private void EnsureMinVelocity()
 	{
 		if (mBody.velocity.magnitude < 30 && preFreezeVelocity == Vector3.zero) mBody.velocity *= 2;
-		else if (mBody.velocity.magnitude == 0 && preFreezeVelocity == Vector3.zero)
+		else if (mBody.velocity.magnitude <= 0 && preFreezeVelocity == Vector3.zero)
 		{
 			mBody.velocity = 20 * ((Random.Range(-1f, 1f) * Vector3.forward) +
 			(Random.Range(-1f, 1f) * Vector3.right)).normalized;
 		}
-
 	}
 
 	public void TakeDamage(int amount)
