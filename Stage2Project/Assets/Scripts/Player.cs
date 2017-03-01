@@ -21,7 +21,7 @@ public class Player : MonoBehaviour
     private Rigidbody mBody;
     private Renderer renderer;
 	private PowerUpTimer timerDisplay;
-	private Inventory inventory;
+	private InventoryDisplay inventoryDisplay;
 	private float leftBound, rightBound, bottomBound, topBound;
 	private HealthCounter healthCounter;
 	private bool powerUpActive;
@@ -58,7 +58,7 @@ public class Player : MonoBehaviour
         mBody = GetComponent<Rigidbody>();
         healthCounter = FindObjectOfType<HealthCounter>();
         timerDisplay = FindObjectOfType<PowerUpTimer>();
-        inventory = FindObjectOfType<Inventory>();
+        inventoryDisplay = FindObjectOfType<InventoryDisplay>();
         //renderer = GetComponent<Renderer>();
         //defaultColour = renderer.material.color;
     }
@@ -90,17 +90,17 @@ public class Player : MonoBehaviour
         if (Input.GetButton("Select1"))
         {
 			powerIndex = 0;
-			if (!powerUpActive) currentPowerType = powerUps[powerIndex];
+			inventoryDisplay.UpdateDisplay();
         }	
         else if (Input.GetButton("Select2") && numPowerUps > 1)
         {
         	powerIndex = 1;
-			if (!powerUpActive) currentPowerType = powerUps[powerIndex];
+			inventoryDisplay.UpdateDisplay();
 		}
         else if (Input.GetButton("Select3") && numPowerUps > 2)
         {
         	powerIndex = 2;
-			if (!powerUpActive) currentPowerType = powerUps[powerIndex];
+			inventoryDisplay.UpdateDisplay();
 		}
 
 		if (Input.GetButtonDown("Fire1") && powerUps[powerIndex] != PowerUp.Type.None)
@@ -141,7 +141,6 @@ public class Player : MonoBehaviour
 		}
         if (powerUpActive) CheckPowerUps();
 		if (!touchingHorizontal && !touchingVertical) EnsureMinVelocity();
-        inventory.UpdateDisplay();
 		ClampToPlaySpace();
 
     }
@@ -315,6 +314,7 @@ public class Player : MonoBehaviour
 			health++;
 			healthCounter.IncrementDisplay();
 		}
+		inventoryDisplay.UpdateDisplay();
 	}
 
 	private void CheckPowerUps()
@@ -357,6 +357,7 @@ public class Player : MonoBehaviour
 		{
 			powerIndex = (powerIndex >= numPowerUps) ? powerIndex - 1 : powerIndex;
 		}
+		inventoryDisplay.UpdateDisplay();
 	}
 
 	private void FireGun()
@@ -382,7 +383,6 @@ public class Player : MonoBehaviour
 		FreezePosition();
 		GameObject crosshairs = Instantiate(crosshairPrefab) as GameObject;
 		RearrangeInventory();
-		currentPowerType = powerUps[powerIndex];
 	}
 }
 
