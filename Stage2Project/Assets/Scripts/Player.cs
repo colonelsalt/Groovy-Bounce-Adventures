@@ -20,12 +20,11 @@ public class Player : MonoBehaviour
 
     private Rigidbody mBody;
     private Renderer renderer;
-	private PowerUpTimer timerDisplay;
+	private PowerUpTimer powerUpTimer;
 	private InventoryDisplay inventoryDisplay;
 	private float leftBound, rightBound, bottomBound, topBound;
 	private HealthCounter healthCounter;
 	private bool powerUpActive;
-	private float powerUpTimer;
 	public PowerUp.Type[] powerUps;
 	private int numPowerUps;
 	public int powerIndex;
@@ -57,7 +56,7 @@ public class Player : MonoBehaviour
 
         mBody = GetComponent<Rigidbody>();
         healthCounter = FindObjectOfType<HealthCounter>();
-        timerDisplay = FindObjectOfType<PowerUpTimer>();
+        powerUpTimer = FindObjectOfType<PowerUpTimer>();
         inventoryDisplay = FindObjectOfType<InventoryDisplay>();
         //renderer = GetComponent<Renderer>();
         //defaultColour = renderer.material.color;
@@ -110,25 +109,25 @@ public class Player : MonoBehaviour
 			{
 				// TODO: make a neater/flashier graphical effect for these powerups:
 				case PowerUp.Type.Star:
-					renderer.material.color = Color.magenta;
+					// renderer.material.color = Color.magenta;
 					break;
 				case PowerUp.Type.Gun:
 					preFreezeVelocity = mBody.velocity;
 					mBody.velocity /= 4;
-					renderer.material.color = Color.cyan;
+					// renderer.material.color = Color.cyan;
 					InvokeRepeating("FireGun", 0.0000000001f, 0.25f);
 					break;
 				case PowerUp.Type.Shield:
-					renderer.material.color = Color.red;
+					// renderer.material.color = Color.red;
 					break;
 				case PowerUp.Type.Bomb:
 					FireBomb();
 					break;
 			}
 		}
-		else if (Input.GetButtonUp("Fire1"))
+		else if (Input.GetButtonUp("Fire1") || !powerUpActive)
 		{
-			if (currentPowerType != PowerUp.Type.Shield) renderer.material.color = defaultColour;
+			//if (currentPowerType != PowerUp.Type.Shield) renderer.material.color = defaultColour;
 			if (currentPowerType == PowerUp.Type.Gun)
 			{
 				CancelInvoke("FireGun");
@@ -139,7 +138,6 @@ public class Player : MonoBehaviour
 				preFreezeVelocity = Vector3.zero;
 			}
 		}
-        if (powerUpActive) CheckPowerUps();
 		if (!touchingHorizontal && !touchingVertical) EnsureMinVelocity();
 		ClampToPlaySpace();
 
@@ -161,6 +159,8 @@ public class Player : MonoBehaviour
 			mBody.velocity = preFreezeVelocity;
 			preFreezeVelocity = Vector3.zero;
 		}
+		powerUpTimer.CancelTimer();
+		powerUpActive = false;
 	}
 
 	public void IncreaseSize()
@@ -307,7 +307,6 @@ public class Player : MonoBehaviour
 
 	public void AddPowerUp(PowerUp.Type type)
 	{
-		Debug.Log("AddPowerUp called!");
 		if (numPowerUps < 3 && type != PowerUp.Type.ExtraLife) powerUps[numPowerUps++] = type;
 		else if (type == PowerUp.Type.ExtraLife && health < MAXHEALTH)
 		{
@@ -317,27 +316,21 @@ public class Player : MonoBehaviour
 		inventoryDisplay.UpdateDisplay();
 	}
 
-	private void CheckPowerUps()
+	public void CancelPowerUp()
 	{
-		powerUpTimer -= Time.deltaTime;
-		timerDisplay.UpdateDisplay(powerUpTimer);
-		if (powerUpTimer <= 0f)
-		{
-			powerUpActive = false;
-			renderer.material.color = defaultColour;
-			currentPowerType = powerUps[powerIndex];
-			CancelInvoke("FireGun");
-		}
+		powerUpActive = false;
+		// renderer.material.color = defaultColour;
+		currentPowerType = powerUps[powerIndex];
+		CancelInvoke("FireGun");
 	}
 
 	private void StartPowerUp()
 	{
 		if (currentPowerType != PowerUp.Type.Bomb)
 		{
-			Debug.Log("Powerup activating!");
 			powerUpActive = true;
-			powerUpTimer = 8f;
 			RearrangeInventory();
+			powerUpTimer.StartTimer();
 		}
 	}
 
@@ -379,10 +372,10 @@ public class Player : MonoBehaviour
 	private void FireBomb()
 	{
 		preFreezeVelocity = mBody.velocity;
-		Debug.Log("Saving velocity: " + preFreezeVelocity);
 		FreezePosition();
-		GameObject crosshairs = Instantiate(crosshairPrefab) as GameObject;
 		RearrangeInventory();
+		powerUpTimer.StartTimer();
+		Instantiate(crosshairPrefab);
 	}
 }
 

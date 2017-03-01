@@ -5,22 +5,71 @@ using UnityEngine.UI;
 
 public class PowerUpTimer : MonoBehaviour {
 
-	Text text;
+	public float TIME_FACTOR;
+
+	private GameObject barHolder;
+	private Scrollbar timeBar;
+	private RawImage activePowerImage;
+	private InventoryDisplay inventory;
+	private Player player;
+	private bool timerActive = false;
 
 	void Start ()
 	{
-		text = GetComponent<Text>();
-		UpdateDisplay(0f);
-	}
-	
-	public void UpdateDisplay(float remainingTime)
-	{
-		if (remainingTime > 0) text.text = "Powerup time: \n" + remainingTime.ToString();
-		else text.text = "";
+		barHolder = transform.GetChild(0).gameObject;
+		timeBar = barHolder.GetComponent<Scrollbar>();
+		activePowerImage = transform.GetChild(1).gameObject.GetComponent<RawImage>();
+		EnableDisplay(false);
+		inventory = FindObjectOfType<InventoryDisplay>();
+		player = FindObjectOfType<Player>();
 	}
 
-	public void ResetDisplay()
+	public void StartTimer()
 	{
-		text.text = "";
+		timerActive = true;
+		timeBar.size = 1;
+		switch (player.currentPowerType)
+		{
+			case PowerUp.Type.Bomb:
+				activePowerImage.texture = inventory.bombSprite[0];
+				break;
+			case PowerUp.Type.Gun:
+				activePowerImage.texture = inventory.gunSprite[0];
+				break;
+			case PowerUp.Type.Shield:
+				activePowerImage.texture = inventory.shieldSprite[0];
+				break;
+			case PowerUp.Type.Star:
+				activePowerImage.texture = inventory.starSprite[0];
+				break;
+		}
+		EnableDisplay(true);
+	}
+
+	public void CancelTimer()
+	{
+		timerActive = false;
+		EnableDisplay(false);
+		player.CancelPowerUp();
+	}
+
+	private void EnableDisplay(bool enabled)
+	{
+		activePowerImage.enabled = enabled;
+		barHolder.GetComponent<Image>().enabled = enabled;
+		barHolder.transform.GetChild(0).GetChild(0).gameObject.GetComponent<Image>().enabled = enabled;
+		timeBar.enabled = enabled;
+	}
+
+	void Update()
+	{
+		if (timeBar.size > 0 && timerActive)
+		{
+			timeBar.size -= TIME_FACTOR * Time.deltaTime;
+		}
+		else if (timerActive)
+		{
+			CancelTimer();
+		}
 	}
 }

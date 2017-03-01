@@ -38,12 +38,10 @@ public class Bomb : MonoBehaviour {
 		if (Input.GetButtonDown("Fire1"))
 		{
 			timer = slowMotionTime;
-			timerDisplay.ResetDisplay();
 			Instantiate(explosionPrefab, transform.position, Quaternion.identity);
 			ReturnTimeToNormal();
 		}
 		timer += Time.deltaTime;
-		timerDisplay.UpdateDisplay(slowMotionTime - timer);
 		if (timer > slowMotionTime)
 		{
 			ReturnTimeToNormal();
@@ -52,7 +50,6 @@ public class Bomb : MonoBehaviour {
 
 	private void SlowDownTime()
 	{
-		// TODO: add motion blur + black and white camera effect here
 		Time.timeScale = 0.04f;
 		Time.fixedDeltaTime = 0.02f * Time.timeScale;
 		timer = 0f;
