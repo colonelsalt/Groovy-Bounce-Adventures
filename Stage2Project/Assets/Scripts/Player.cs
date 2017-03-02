@@ -10,7 +10,6 @@ public class Player : MonoBehaviour
     public float bounceFactor, velocityBoost, floatDistance;
     public float projectileSpeed;
     public float TIME_INVINCIBLE;
-	public bool touchingHorizontal, touchingVertical;
 	public int health;
 	public int MAXHEALTH;
 	public GameObject projectilePrefab;
@@ -19,7 +18,9 @@ public class Player : MonoBehaviour
 	public GameObject crashTrailPrefab;
 	public GameObject bounceTrailPrefab;
 	public GameObject starPrefab;
+	public GameObject outerGlowPrefab;
 	public Material hurtFace;
+	public PowerUp.Type[] powerUps;
 	public bool isInvincible;
 
     private Rigidbody mBody;
@@ -27,11 +28,11 @@ public class Player : MonoBehaviour
 	private PowerUpTimer powerUpTimer;
 	private InventoryDisplay inventoryDisplay;
 	private float leftBound, rightBound, bottomBound, topBound;
+	public bool touchingHorizontal, touchingVertical;
 	private float invincibilityTime;
 	private HealthCounter healthCounter;
 	private Behaviour halo;
 	private bool powerUpActive;
-	public PowerUp.Type[] powerUps;
 	private int numPowerUps;
 	public int powerIndex;
 	private Vector3 preFreezeVelocity;
@@ -56,7 +57,7 @@ public class Player : MonoBehaviour
 		rend = GetComponent<Renderer>();
         defaultMaterial = rend.material;
 		halo = (Behaviour) GetComponent("Halo");
-		
+
 		Init();
     }
 
@@ -70,30 +71,36 @@ public class Player : MonoBehaviour
     	numPowerUps = powerIndex = 0;
     	preFreezeVelocity = Vector3.zero;
 		transform.rotation = bottomRotation;
+		transform.localScale = new Vector3(8, 8, 8);
     }
 
     void Update()
     {
-		if (Input.GetButton("Horizontal") && touchingHorizontal)
+		if (Input.GetButton("Horizontal"))
         {
-            transform.position += Input.GetAxisRaw("Horizontal") * Vector3.right * Speed * Time.deltaTime;
-			if (transform.position.x != leftBound && transform.position.x != rightBound) touchingVertical = false;
+			if (touchingHorizontal)
+			{ // move linearly
+				transform.position += Input.GetAxisRaw("Horizontal") * Vector3.right * Speed * Time.deltaTime;
+				if (transform.position.x != leftBound && transform.position.x != rightBound) touchingVertical = false;
+			}
+			else if (touchingVertical)
+			{ // bounce if corresponding key pressed
+				if (transform.position.x < 0 && Input.GetAxisRaw("Horizontal") == 1) Bounce();
+				else if (transform.position.x > 0 && Input.GetAxisRaw("Horizontal") == -1) Bounce();
+			}
         }
-		else if (Input.GetButton("Vertical")  && touchingVertical)
+		if (Input.GetButton("Vertical"))
         {
-            transform.position += Input.GetAxisRaw("Vertical") * Vector3.forward * Speed * Time.deltaTime;
-			if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
-        }
-
-        if (Input.GetButton("Bounce") && (touchingVertical || touchingHorizontal))
-        {
-        	mBody.constraints = RigidbodyConstraints.FreezePositionY;
-        	mBody.isKinematic = false;
-			Vector3 bounceDirection = GetBounceDirection();
-			mBody.velocity = velocityBoost * bounceDirection;
-			mBody.AddForce(bounceFactor * bounceDirection * Time.deltaTime);
-			BounceEffect();
-        	touchingHorizontal = touchingVertical = false;
+        	if (touchingVertical)
+        	{ // move linearly
+				transform.position += Input.GetAxisRaw("Vertical") * Vector3.forward * Speed * Time.deltaTime;
+				if (transform.position.z != bottomBound && transform.position.z != topBound) touchingHorizontal = false;
+        	}
+        	else if (touchingHorizontal)
+        	{ // bounce if corresponding key pressed
+				if (transform.position.z < 0 && Input.GetAxisRaw("Vertical") == 1) Bounce();
+				else if (transform.position.z > 0 && Input.GetAxisRaw("Vertical") == -1) Bounce();
+        	}	
         }
 
         if (Input.GetButton("Select1"))
@@ -157,6 +164,17 @@ public class Player : MonoBehaviour
 		ClampToPlaySpace();
     }
 
+    private void Bounce()
+    {
+		mBody.constraints = RigidbodyConstraints.FreezePositionY;
+    	mBody.isKinematic = false;
+		Vector3 bounceDirection = GetBounceDirection();
+		mBody.velocity = velocityBoost * bounceDirection;
+		mBody.AddForce(bounceFactor * bounceDirection * Time.deltaTime);
+		BounceEffect();
+    	touchingHorizontal = touchingVertical = false;
+    }
+
 	private void FreezePosition()
 	{
 		mBody.isKinematic = true;
@@ -179,7 +197,8 @@ public class Player : MonoBehaviour
 
 	public void IncreaseSize()
 	{
-		transform.localScale = transform.localScale * 1.03f;
+		transform.localScale = transform.localScale * 1.02f;
+		GameObject outerGlow = Instantiate(outerGlowPrefab, transform);
 	}
 
 	private Vector3 GetBounceDirection()
