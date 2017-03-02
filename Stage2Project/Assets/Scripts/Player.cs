@@ -45,27 +45,31 @@ public class Player : MonoBehaviour
 		rightBound = (Arena.Width / 2) - VerticalWall.Width;
 		bottomBound = (-Arena.Height / 2) + HorizontalWall.Height;
 		topBound = (Arena.Height / 2) - HorizontalWall.Height;
+    	bottomRotation = Quaternion.Euler(-41, -84, 75);
+    	topRotation = Quaternion.Euler(-43, 105, 59);
+    	leftRotation = Quaternion.Euler(-43, 16, 59);
+    	rightRotation = Quaternion.Euler(-41, 198, 57);
+        healthCounter = FindObjectOfType<HealthCounter>();
+        powerUpTimer = FindObjectOfType<PowerUpTimer>();
+        inventoryDisplay = FindObjectOfType<InventoryDisplay>();
+		mBody = GetComponent<Rigidbody>();
+		rend = GetComponent<Renderer>();
+        defaultMaterial = rend.material;
+		halo = (Behaviour) GetComponent("Halo");
+		
+		Init();
+    }
 
-    	touchingHorizontal = true;
+    public void Init()
+    {
+		health = MAXHEALTH;
+		touchingHorizontal = true;
     	touchingVertical = powerUpActive = isInvincible = false;
     	currentPowerType = PowerUp.Type.None;
     	powerUps = new PowerUp.Type[3];
     	numPowerUps = powerIndex = 0;
     	preFreezeVelocity = Vector3.zero;
-    	bottomRotation = Quaternion.Euler(-41, -84, 75);
-    	topRotation = Quaternion.Euler(-43, 105, 59);
-    	leftRotation = Quaternion.Euler(-43, 16, 59);
-    	rightRotation = Quaternion.Euler(-41, 198, 57);
-
 		transform.rotation = bottomRotation;
-
-        mBody = GetComponent<Rigidbody>();
-		rend = GetComponent<Renderer>();
-        defaultMaterial = rend.material;
-        healthCounter = FindObjectOfType<HealthCounter>();
-        powerUpTimer = FindObjectOfType<PowerUpTimer>();
-        inventoryDisplay = FindObjectOfType<InventoryDisplay>();
-		halo = (Behaviour) GetComponent("Halo");
     }
 
     void Update()
@@ -113,10 +117,9 @@ public class Player : MonoBehaviour
 			if (!powerUpActive) StartPowerUp();
 			switch (currentPowerType)
 			{
-				// TODO: make a neater/flashier graphical effect for these powerups:
 				case PowerUp.Type.Star:
 					Vector3 starPos = new Vector3(transform.position.x,
-									transform.position.y + transform.localScale.y, transform.position.z);
+											transform.position.y + transform.localScale.y, transform.position.z);
 					star = Instantiate(starPrefab, starPos, Quaternion.Euler(90, 0, 0)) as GameObject;
 					star.GetComponent<Transform>().SetParent(transform);
 					break;
@@ -338,10 +341,9 @@ public class Player : MonoBehaviour
 	public void CancelPowerUp()
 	{
 		powerUpActive = false;
-		// renderer.material.color = defaultColour;
 		if (currentPowerType == PowerUp.Type.Shield) halo.enabled = isInvincible = false;
-		currentPowerType = powerUps[powerIndex];
 		CancelInvoke("FireGun");
+		currentPowerType = PowerUp.Type.None;
 	}
 
 	private void StartPowerUp()

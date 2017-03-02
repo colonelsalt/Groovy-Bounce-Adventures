@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class Score : MonoBehaviour {
 
-	public static int score = 0;
+	public int score = 0;
 	private Text scoreDisplay;
 	private Animator animator;
 
@@ -21,5 +21,10 @@ public class Score : MonoBehaviour {
 		score += amount;
 		scoreDisplay.text = score.ToString();
 		animator.SetTrigger("RegularFlash");
+	}
+
+	public void ResetScore()
+	{
+		score = 0;
 	}
 }

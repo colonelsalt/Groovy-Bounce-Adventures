@@ -16,4 +16,9 @@ public class HealthCounter : MonoBehaviour {
 		Transform heart = transform.GetChild(--heartIndex);
 		heart.gameObject.GetComponent<RawImage>().enabled = true;
 	}
+
+	public void ResetDisplay()
+	{
+		heartIndex = 0;
+	}
 }

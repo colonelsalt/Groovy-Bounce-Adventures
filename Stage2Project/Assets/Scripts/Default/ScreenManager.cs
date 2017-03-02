@@ -39,7 +39,6 @@ public class ScreenManager : MonoBehaviour
 
     public void StartGame()
     {
-    	Debug.Log("StartGame in ScreenManager called!");
         if(OnNewGame != null)
         {
             OnNewGame();

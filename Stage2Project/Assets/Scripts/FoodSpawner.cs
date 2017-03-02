@@ -6,10 +6,11 @@ public class FoodSpawner : MonoBehaviour {
 
 	public GameObject[] foodPrefabs;
 
-	void Awake ()
+	void Start()
 	{
 		GameObject food = Instantiate(foodPrefabs[Random.Range(0, foodPrefabs.Length)]);
-		food.transform.parent = transform.parent;
+		food.GetComponent<Transform>().parent = transform.parent;
+		FindObjectOfType<GameManager>().mObjects.Add(food);
 		Destroy(gameObject);
 	}
 }

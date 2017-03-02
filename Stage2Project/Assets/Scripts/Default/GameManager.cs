@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,15 +19,21 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float TimeBetweenSpawns;
 
-    private List<GameObject> mObjects;
+    public List<GameObject> mObjects;
     private Player mPlayer;
     private State mState;
     private float mNextSpawn;
 
+    private GameObject score, health, inventory;
+
     void Awake()
     {
-        mPlayer = Instantiate(PlayerPrefab);
+		mPlayer = Instantiate(PlayerPrefab);
         mPlayer.transform.parent = transform;
+
+        score = GameObject.Find("Score");
+        health = GameObject.Find("Health");
+        inventory = GameObject.Find("Inventory");
 
         ScreenManager.OnNewGame += ScreenManager_OnNewGame;
         ScreenManager.OnExitGame += ScreenManager_OnExitGame;
@@ -36,6 +43,7 @@ public class GameManager : MonoBehaviour
     {
         Arena.Calculate();
         mPlayer.enabled = false;
+        SetUIVisibility(false);
         mState = State.Paused;
     }
 
@@ -72,17 +80,43 @@ public class GameManager : MonoBehaviour
             mObjects.Clear();
         }
 
-        mPlayer.transform.position = new Vector3(4.5f, 3f, -55f); // TODO: change this to something not hardcoded
+        mPlayer.Init();
+        mPlayer.transform.position = new Vector3(4.5f, 3f, -55f);
 
         mNextSpawn = TimeBetweenSpawns;
         mPlayer.enabled = true;
+        SetUIVisibility(true);
+        health.GetComponent<HealthCounter>().ResetDisplay();
+        score.GetComponent<Score>().ResetScore();
         mState = State.Playing;
     }
 
     private void EndGame()
     {
         mPlayer.enabled = false;
+        SetUIVisibility(false);
         mState = State.Paused;
+    }
+
+    private void SetUIVisibility(bool enabled)
+    {
+    	score.GetComponent<Text>().enabled = enabled;
+    	inventory.GetComponent<RawImage>().enabled = enabled;
+    	Transform healthTransform = health.GetComponent<Transform>();
+    	foreach (Transform child in healthTransform)
+    	{
+    		child.gameObject.GetComponent<RawImage>().enabled = enabled;
+    	}
+
+		// inventory images should only be disabled (enabled on case-by-case basis in-game)
+		if (!enabled)
+    	{
+    		Transform inventoryTransform = inventory.GetComponent<Transform>();
+    		foreach (Transform child in inventoryTransform)
+    		{
+    			child.gameObject.GetComponent<RawImage>().enabled = false;
+    		}
+    	}
     }
 
     private void ScreenManager_OnNewGame()
@@ -94,4 +128,5 @@ public class GameManager : MonoBehaviour
     {
         EndGame();
     }
+   
 }

@@ -23,11 +23,7 @@ public class Food : MonoBehaviour {
 		{
 			health--;
 		}
-		if (health <= 0)
-		{
-			Debug.Log("Food died!");
-			Destroy(gameObject);
-		}
+		if (health <= 0) Destroy(gameObject);
 	}
 
 	void OnParticleCollision(GameObject particle)
