@@ -17,22 +17,21 @@ public class Player : MonoBehaviour
 	public PowerUp.Type currentPowerType;
 	public GameObject crashTrailPrefab;
 	public GameObject bounceTrailPrefab;
+	public GameObject starPrefab;
 
     private Rigidbody mBody;
-    private Renderer renderer;
 	private PowerUpTimer powerUpTimer;
 	private InventoryDisplay inventoryDisplay;
 	private float leftBound, rightBound, bottomBound, topBound;
 	private HealthCounter healthCounter;
+	private Behaviour halo;
 	private bool powerUpActive;
 	public PowerUp.Type[] powerUps;
 	private int numPowerUps;
 	public int powerIndex;
 	private Vector3 preFreezeVelocity;
 	private Quaternion bottomRotation, topRotation, leftRotation, rightRotation;
-
-	// TODO: remove this simplified fix for changing colours
-	private Color defaultColour;
+	private GameObject star;
 
     void Start()
     {
@@ -58,6 +57,8 @@ public class Player : MonoBehaviour
         healthCounter = FindObjectOfType<HealthCounter>();
         powerUpTimer = FindObjectOfType<PowerUpTimer>();
         inventoryDisplay = FindObjectOfType<InventoryDisplay>();
+		halo = (Behaviour) GetComponent("Halo");
+
         //renderer = GetComponent<Renderer>();
         //defaultColour = renderer.material.color;
     }
@@ -109,38 +110,35 @@ public class Player : MonoBehaviour
 			{
 				// TODO: make a neater/flashier graphical effect for these powerups:
 				case PowerUp.Type.Star:
-					// renderer.material.color = Color.magenta;
+					Vector3 starPos = new Vector3(transform.position.x,
+									transform.position.y + transform.localScale.y, transform.position.z);
+					star = Instantiate(starPrefab, starPos, Quaternion.Euler(90, 0, 0)) as GameObject;
+					star.GetComponent<Transform>().SetParent(transform);
 					break;
 				case PowerUp.Type.Gun:
 					preFreezeVelocity = mBody.velocity;
 					mBody.velocity /= 4;
 					// renderer.material.color = Color.cyan;
-					InvokeRepeating("FireGun", 0.0000000001f, 0.25f);
+					InvokeRepeating("FireGun", 0.0000000001f, 0.15f);
 					break;
 				case PowerUp.Type.Shield:
-					// renderer.material.color = Color.red;
-					break;
-				case PowerUp.Type.Bomb:
-					FireBomb();
+					halo.enabled = true;
 					break;
 			}
 		}
 		else if (Input.GetButtonUp("Fire1") || !powerUpActive)
 		{
 			//if (currentPowerType != PowerUp.Type.Shield) renderer.material.color = defaultColour;
-			if (currentPowerType == PowerUp.Type.Gun)
+			CancelInvoke("FireGun");
+			if (preFreezeVelocity.magnitude > 0 && !(touchingHorizontal || touchingVertical))
 			{
-				CancelInvoke("FireGun");
-				if (preFreezeVelocity.magnitude > 0 && !(touchingHorizontal || touchingVertical))
-				{
-					mBody.velocity = preFreezeVelocity;
-				}
+				mBody.velocity = preFreezeVelocity;
 				preFreezeVelocity = Vector3.zero;
 			}
+			if (star) Destroy(star);
 		}
 		if (!touchingHorizontal && !touchingVertical) EnsureMinVelocity();
 		ClampToPlaySpace();
-
     }
 
 	private void FreezePosition()
@@ -320,18 +318,16 @@ public class Player : MonoBehaviour
 	{
 		powerUpActive = false;
 		// renderer.material.color = defaultColour;
+		if (currentPowerType == PowerUp.Type.Shield) halo.enabled = false;
 		currentPowerType = powerUps[powerIndex];
 		CancelInvoke("FireGun");
 	}
 
 	private void StartPowerUp()
 	{
-		if (currentPowerType != PowerUp.Type.Bomb)
-		{
-			powerUpActive = true;
-			RearrangeInventory();
-			powerUpTimer.StartTimer();
-		}
+		powerUpActive = true;
+		RearrangeInventory();
+		powerUpTimer.StartTimer();
 	}
 
 	private void RearrangeInventory()
@@ -351,6 +347,7 @@ public class Player : MonoBehaviour
 			powerIndex = (powerIndex >= numPowerUps) ? powerIndex - 1 : powerIndex;
 		}
 		inventoryDisplay.UpdateDisplay();
+		if (currentPowerType == PowerUp.Type.Bomb) FireBomb();
 	}
 
 	private void FireGun()
@@ -358,13 +355,17 @@ public class Player : MonoBehaviour
 		Vector3 firePos = new Vector3(transform.position.x, 0.5f, transform.position.z);
 		GameObject shot = Instantiate(projectilePrefab, firePos, Quaternion.identity) as GameObject;
 		Rigidbody fireBody = shot.GetComponent<Rigidbody>();
+		Transform fireTransform = shot.GetComponent<Transform>();
 		if (Input.GetButton("Horizontal") || Input.GetButton("Vertical"))
 		{ // shoot in direction indicated by input direction
-			fireBody.velocity = projectileSpeed * ((Input.GetAxis("Vertical") * Vector3.forward)
-			+ (Input.GetAxis("Horizontal") * Vector3.right).normalized);
+			Vector3 newDirection = ((Input.GetAxis("Vertical") * Vector3.forward) +
+									(Input.GetAxis("Horizontal") * Vector3.right).normalized);
+			fireTransform.rotation = Quaternion.LookRotation(newDirection);
+			fireBody.velocity = projectileSpeed * newDirection;
 		}
 		else
 		{ // shoot in the direction of player travel
+			fireTransform.rotation = Quaternion.LookRotation(mBody.velocity);
 			fireBody.velocity = mBody.velocity.normalized * projectileSpeed;
 		}
 	}
@@ -373,8 +374,6 @@ public class Player : MonoBehaviour
 	{
 		preFreezeVelocity = mBody.velocity;
 		FreezePosition();
-		RearrangeInventory();
-		powerUpTimer.StartTimer();
 		Instantiate(crosshairPrefab);
 	}
 }

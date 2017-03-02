@@ -7,8 +7,9 @@ public class PowerUpSpawner : MonoBehaviour {
 	public GameObject[] powerUpPrefabs;
 
 	void Awake ()
-	{
-		GameObject powerUp = Instantiate(powerUpPrefabs[Random.Range(0, powerUpPrefabs.Length)]);
+	{ // TODO: OBVS
+		//GameObject powerUp = Instantiate(powerUpPrefabs[Random.Range(0, powerUpPrefabs.Length)]);
+		GameObject powerUp = Instantiate(powerUpPrefabs[0]);
 		powerUp.transform.parent = transform.parent;
 		Destroy(gameObject);
 	}
