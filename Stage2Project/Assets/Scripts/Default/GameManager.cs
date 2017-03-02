@@ -23,8 +23,9 @@ public class GameManager : MonoBehaviour
     private Player mPlayer;
     private State mState;
     private float mNextSpawn;
+    private bool gamePaused;
 
-    private GameObject score, health, inventory;
+    private GameObject score, health, inventory, pauseScreen;
 
     void Awake()
     {
@@ -34,6 +35,7 @@ public class GameManager : MonoBehaviour
         score = GameObject.Find("Score");
         health = GameObject.Find("Health");
         inventory = GameObject.Find("Inventory");
+        pauseScreen = GameObject.Find("PauseScreen");
 
         ScreenManager.OnNewGame += ScreenManager_OnNewGame;
         ScreenManager.OnExitGame += ScreenManager_OnExitGame;
@@ -42,7 +44,6 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         Arena.Calculate();
-        //mPlayer.enabled = false;
         SetUIVisibility(false);
         mState = State.Paused;
     }
@@ -66,6 +67,8 @@ public class GameManager : MonoBehaviour
                 mObjects.Add(spawnedInstance);
                 mNextSpawn = TimeBetweenSpawns;
             }
+            if (Input.GetButton("Pause")) PauseScreen();
+            if (gamePaused) PauseScreen();
         }
     }
 
@@ -118,6 +121,20 @@ public class GameManager : MonoBehaviour
     		}
     	}
     }
+
+    private void PauseScreen()
+    {
+    	gamePaused = true;
+    	pauseScreen.GetComponent<Image>().enabled = true;
+    	Time.timeScale = 0f;
+		if (Input.GetButton("Submit"))
+    	{
+    		gamePaused = false;
+			pauseScreen.GetComponent<Image>().enabled = false;
+    		Time.timeScale = 1f;
+    	}
+    	else if (Input.GetButtonDown("Escape")) Application.Quit();
+	}
 
     private void ScreenManager_OnNewGame()
     {

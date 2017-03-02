@@ -57,6 +57,11 @@ public class ScreenManager : MonoBehaviour
         TransitionTo(Screens.ResultScreen);
     }
 
+    public void QuitGame()
+    {
+    	Application.Quit();
+    }
+
     private void TransitionTo(Screens screen)
     {
         mScreens[(int)mCurrentScreen].enabled = false;
