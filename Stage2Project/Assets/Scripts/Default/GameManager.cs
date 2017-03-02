@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         Arena.Calculate();
-        mPlayer.enabled = false;
+        //mPlayer.enabled = false;
         SetUIVisibility(false);
         mState = State.Paused;
     }
@@ -80,7 +80,6 @@ public class GameManager : MonoBehaviour
             mObjects.Clear();
         }
 
-        mPlayer.Init();
         mPlayer.transform.position = new Vector3(4.5f, 3f, -55f);
 
         mNextSpawn = TimeBetweenSpawns;
@@ -88,6 +87,7 @@ public class GameManager : MonoBehaviour
         SetUIVisibility(true);
         health.GetComponent<HealthCounter>().ResetDisplay();
         score.GetComponent<Score>().ResetScore();
+		mPlayer.Init();
         mState = State.Playing;
     }
 

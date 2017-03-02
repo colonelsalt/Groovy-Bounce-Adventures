@@ -6,13 +6,13 @@ public class TileChange : MonoBehaviour {
 
 	public Material[] tilesets;
 	public float switchTime;
-	private Renderer renderer;
+	private Renderer rend;
 	private float timeSinceSwitch;
 	private int tileIndex = 1;
 
 	void Awake()
 	{
-		renderer = GetComponent<Renderer>();
+		rend = GetComponent<Renderer>();
 		timeSinceSwitch = 0f;
 	}
 
@@ -22,7 +22,7 @@ public class TileChange : MonoBehaviour {
 		if (timeSinceSwitch >= switchTime)
 		{
 			timeSinceSwitch = 0f;
-			renderer.material = tilesets[tileIndex];
+			rend.material = tilesets[tileIndex];
 			tileIndex = (tileIndex + 1) % tilesets.Length;
 		}	
 	}

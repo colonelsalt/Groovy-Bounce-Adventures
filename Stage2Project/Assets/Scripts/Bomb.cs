@@ -10,6 +10,7 @@ public class Bomb : MonoBehaviour {
 
 	private Player player;
 	private float timer;
+	private AudioSource audioSource;
 
 	void Awake()
 	{
@@ -35,8 +36,10 @@ public class Bomb : MonoBehaviour {
 		}
 		if (Input.GetButtonDown("Fire1"))
 		{
+			GetComponent<AudioSource>().Stop();
 			timer = slowMotionTime;
-			Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+			GameObject explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity) as GameObject;
+			Destroy(explosion, 2.5f);
 			ReturnTimeToNormal();
 		}
 		timer += Time.deltaTime;

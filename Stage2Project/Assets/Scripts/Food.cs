@@ -37,9 +37,9 @@ public class Food : MonoBehaviour {
 		{
 			Player player = col.gameObject.GetComponent<Player>();
 			if (player.currentPowerType == PowerUp.Type.Star && Input.GetButton("Fire1"))
-			{
-				Vector3 bounceDirection = bounceFactor * (Vector3.forward * Random.Range(-1f, 1f)
-										+ Vector3.right * Random.Range(-1f, 1f)).normalized;
+			{ // push food away from player if star powerup used against it
+				Vector3 bounceDirection = (player.GetComponent<Rigidbody>().velocity.normalized +
+				(Vector3.forward * Random.Range(-0.3f, 0.3f) + Vector3.right * Random.Range(-0.3f, 0.3f))).normalized;
 				mBody.AddForce(bounceDirection * bounceFactor);
 				health--;
 			}

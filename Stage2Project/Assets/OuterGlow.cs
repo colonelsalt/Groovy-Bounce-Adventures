@@ -9,7 +9,6 @@ public class OuterGlow : MonoBehaviour {
 	private Vector3 growthStep;
 	private float timeBetweenGrowth, timePassed;
 
-	// Use this for initialization
 	void Awake ()
 	{
 		transform.localScale = Vector3.one;

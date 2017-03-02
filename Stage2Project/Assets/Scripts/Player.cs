@@ -19,12 +19,15 @@ public class Player : MonoBehaviour
 	public GameObject bounceTrailPrefab;
 	public GameObject starPrefab;
 	public GameObject outerGlowPrefab;
+	public GameObject playerDeathPrefab;
+	public AudioClip eatingSound, bounceSound, crashSound, damageSound, shieldSound;
 	public Material hurtFace;
 	public PowerUp.Type[] powerUps;
 	public bool isInvincible;
 
     private Rigidbody mBody;
     private Renderer rend;
+    private AudioSource audioSource;
 	private PowerUpTimer powerUpTimer;
 	private InventoryDisplay inventoryDisplay;
 	private float leftBound, rightBound, bottomBound, topBound;
@@ -53,6 +56,7 @@ public class Player : MonoBehaviour
         healthCounter = FindObjectOfType<HealthCounter>();
         powerUpTimer = FindObjectOfType<PowerUpTimer>();
         inventoryDisplay = FindObjectOfType<InventoryDisplay>();
+        audioSource = GetComponentInParent<AudioSource>();
 		mBody = GetComponent<Rigidbody>();
 		rend = GetComponent<Renderer>();
         defaultMaterial = rend.material;
@@ -64,6 +68,7 @@ public class Player : MonoBehaviour
     public void Init()
     {
 		health = MAXHEALTH;
+		rend.enabled = true;
 		touchingHorizontal = true;
     	touchingVertical = powerUpActive = isInvincible = false;
     	currentPowerType = PowerUp.Type.None;
@@ -119,7 +124,7 @@ public class Player : MonoBehaviour
 			inventoryDisplay.UpdateDisplay();
 		}
 
-		if (Input.GetButtonDown("Fire1") && powerUps[powerIndex] != PowerUp.Type.None)
+		if (Input.GetButtonDown("Fire1") && (powerUps[powerIndex] != PowerUp.Type.None || powerUpActive))
 		{
 			if (!powerUpActive) StartPowerUp();
 			switch (currentPowerType)
@@ -137,6 +142,7 @@ public class Player : MonoBehaviour
 					InvokeRepeating("FireGun", 0.0000000001f, 0.15f);
 					break;
 				case PowerUp.Type.Shield:
+					audioSource.PlayOneShot(shieldSound);
 					halo.enabled = isInvincible = true;
 					break;
 			}
@@ -166,6 +172,7 @@ public class Player : MonoBehaviour
 
     private void Bounce()
     {
+		audioSource.PlayOneShot(bounceSound);
 		mBody.constraints = RigidbodyConstraints.FreezePositionY;
     	mBody.isKinematic = false;
 		Vector3 bounceDirection = GetBounceDirection();
@@ -197,8 +204,9 @@ public class Player : MonoBehaviour
 
 	public void IncreaseSize()
 	{
+		audioSource.PlayOneShot(eatingSound);
 		transform.localScale = transform.localScale * 1.02f;
-		GameObject outerGlow = Instantiate(outerGlowPrefab, transform);
+		Instantiate(outerGlowPrefab, transform);
 	}
 
 	private Vector3 GetBounceDirection()
@@ -282,6 +290,7 @@ public class Player : MonoBehaviour
 
 	private void CrashEffect()
 	{
+		audioSource.PlayOneShot(crashSound);
 		Vector3 crashPos = Vector3.zero;
 		Quaternion trailRotation = Quaternion.identity;
 		if (touchingVertical)
@@ -330,6 +339,7 @@ public class Player : MonoBehaviour
 	{
 		if (!isInvincible)
 		{
+			audioSource.PlayOneShot(damageSound);
 			rend.sharedMaterial = hurtFace;
 			isInvincible = true;
 			health--;
@@ -340,7 +350,9 @@ public class Player : MonoBehaviour
 		if (health <= 0)
 		{
 			FreezePosition();
-			// TODO: explosion animation here
+			// TODO: death sound here
+			Instantiate(playerDeathPrefab, transform);
+			rend.enabled = false;
 			ScreenManager sm = FindObjectOfType<ScreenManager>();
 			sm.EndGame();
 		}
