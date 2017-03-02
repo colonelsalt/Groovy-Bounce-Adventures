@@ -53,7 +53,7 @@ public class ScreenManager : MonoBehaviour
         {
             OnExitGame();
         }
-
+        FindObjectOfType<FinalScoreDisplay>().enabled = true;
         TransitionTo(Screens.ResultScreen);
     }
 

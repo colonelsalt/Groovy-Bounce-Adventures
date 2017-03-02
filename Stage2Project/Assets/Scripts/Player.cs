@@ -353,8 +353,6 @@ public class Player : MonoBehaviour
 			// TODO: death sound here
 			Instantiate(playerDeathPrefab, transform);
 			rend.enabled = false;
-			ScreenManager sm = FindObjectOfType<ScreenManager>();
-			sm.EndGame();
 		}
 	}
 

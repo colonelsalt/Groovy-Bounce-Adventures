@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 9f1b1c171966842468d4d2e5f4fa7943
+timeCreated: 1488477670
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: The Black Box
+  fontNames:
+  - The Black Box
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

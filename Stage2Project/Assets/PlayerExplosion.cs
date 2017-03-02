@@ -8,9 +8,12 @@ public class PlayerExplosion : MonoBehaviour {
 
 	public AudioClip playerDeathSound;
 	public float explosionTime, wiggleTime, sizeFactor;
+
+	private bool particlesBegun = false;
 	private Vector3 growthStep;
 	private float timeBetweenGrowth, timePassed;
 	private AudioSource audioSource;
+	private ParticleSystem ps;
 
 	void Awake ()
 	{
@@ -18,6 +21,7 @@ public class PlayerExplosion : MonoBehaviour {
 		else instance = this;	
 
 		audioSource = transform.parent.parent.gameObject.GetComponent<AudioSource>();
+		ps = GetComponent<ParticleSystem>();
 		transform.localScale = Vector3.one;
 		growthStep = transform.parent.localScale * sizeFactor / 20f;
 		timeBetweenGrowth = explosionTime / 20f;
@@ -34,19 +38,31 @@ public class PlayerExplosion : MonoBehaviour {
 			timePassed = 0;
 		}
 		timePassed += Time.deltaTime;
+		if (particlesBegun)
+		{
+			if (!ps.IsAlive())
+			{
+				instance = null;
+				ScreenManager sm = FindObjectOfType<ScreenManager>();
+				Destroy(gameObject, 2f);
+				sm.EndGame();
+			}
+		}
+		transform.rotation = transform.parent.rotation;
+		transform.position = transform.parent.position;
 	}
 
 	private void InitParticles()
 	{
 		Invoke("Hidesprite", explosionTime / 3f);
-		GetComponent<ParticleSystem>().Play();
+		ps.Play();
 		audioSource.PlayOneShot(playerDeathSound);
+		particlesBegun = true;
 	}
 
 	private void Hidesprite()
 	{
 		GetComponent<Renderer>().enabled = false;
-		instance = null;
-		Destroy(gameObject, 2f);
+
 	}
 }

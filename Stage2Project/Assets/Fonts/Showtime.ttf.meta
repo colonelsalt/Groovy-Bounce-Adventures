@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 885f3d00a05ce604fb4627457d5a9ca7
+timeCreated: 1488478337
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Showtime
+  fontNames:
+  - Showtime
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
