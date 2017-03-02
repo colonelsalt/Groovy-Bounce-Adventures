@@ -9,13 +9,11 @@ public class Bomb : MonoBehaviour {
 	public GameObject explosionPrefab;
 
 	private Player player;
-	private PowerUpTimer timerDisplay;
 	private float timer;
 
 	void Awake()
 	{
 		player = FindObjectOfType<Player>();
-		timerDisplay = FindObjectOfType<PowerUpTimer>();
 	}
 
 	void Start ()

@@ -18,14 +18,14 @@ public class Enemy : MonoBehaviour {
 
 	void OnCollisionEnter(Collision col)
 	{
-		if (col.gameObject.tag == "Player" && player.currentPowerType != PowerUp.Type.Shield)
+		if (col.gameObject.tag == "Player")
 		{
 			if (player.currentPowerType == PowerUp.Type.Star && Input.GetButton("Fire1"))
 			{
 				score.IncrementScore(ScoreValue);
 				Destroy(gameObject);
 			}
-			else player.TakeDamage(Damage);
+			else player.TakeDamage();
 		}
 		else if (col.gameObject.tag == "Projectile")
 		{

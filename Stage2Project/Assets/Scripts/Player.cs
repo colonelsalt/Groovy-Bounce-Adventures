@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     public float Speed;
     public float bounceFactor, velocityBoost, floatDistance;
     public float projectileSpeed;
+    public float TIME_INVINCIBLE;
 	public bool touchingHorizontal, touchingVertical;
 	public int health;
 	public int MAXHEALTH;
@@ -18,11 +19,15 @@ public class Player : MonoBehaviour
 	public GameObject crashTrailPrefab;
 	public GameObject bounceTrailPrefab;
 	public GameObject starPrefab;
+	public Material hurtFace;
+	public bool isInvincible;
 
     private Rigidbody mBody;
+    private Renderer rend;
 	private PowerUpTimer powerUpTimer;
 	private InventoryDisplay inventoryDisplay;
 	private float leftBound, rightBound, bottomBound, topBound;
+	private float invincibilityTime;
 	private HealthCounter healthCounter;
 	private Behaviour halo;
 	private bool powerUpActive;
@@ -32,6 +37,7 @@ public class Player : MonoBehaviour
 	private Vector3 preFreezeVelocity;
 	private Quaternion bottomRotation, topRotation, leftRotation, rightRotation;
 	private GameObject star;
+	private Material defaultMaterial;
 
     void Start()
     {
@@ -41,7 +47,7 @@ public class Player : MonoBehaviour
 		topBound = (Arena.Height / 2) - HorizontalWall.Height;
 
     	touchingHorizontal = true;
-    	touchingVertical = powerUpActive = false;
+    	touchingVertical = powerUpActive = isInvincible = false;
     	currentPowerType = PowerUp.Type.None;
     	powerUps = new PowerUp.Type[3];
     	numPowerUps = powerIndex = 0;
@@ -54,13 +60,12 @@ public class Player : MonoBehaviour
 		transform.rotation = bottomRotation;
 
         mBody = GetComponent<Rigidbody>();
+		rend = GetComponent<Renderer>();
+        defaultMaterial = rend.material;
         healthCounter = FindObjectOfType<HealthCounter>();
         powerUpTimer = FindObjectOfType<PowerUpTimer>();
         inventoryDisplay = FindObjectOfType<InventoryDisplay>();
 		halo = (Behaviour) GetComponent("Halo");
-
-        //renderer = GetComponent<Renderer>();
-        //defaultColour = renderer.material.color;
     }
 
     void Update()
@@ -122,13 +127,12 @@ public class Player : MonoBehaviour
 					InvokeRepeating("FireGun", 0.0000000001f, 0.15f);
 					break;
 				case PowerUp.Type.Shield:
-					halo.enabled = true;
+					halo.enabled = isInvincible = true;
 					break;
 			}
 		}
 		else if (Input.GetButtonUp("Fire1") || !powerUpActive)
 		{
-			//if (currentPowerType != PowerUp.Type.Shield) renderer.material.color = defaultColour;
 			CancelInvoke("FireGun");
 			if (preFreezeVelocity.magnitude > 0 && !(touchingHorizontal || touchingVertical))
 			{
@@ -137,7 +141,16 @@ public class Player : MonoBehaviour
 			}
 			if (star) Destroy(star);
 		}
+
 		if (!touchingHorizontal && !touchingVertical) EnsureMinVelocity();
+
+		if (isInvincible && invincibilityTime <= TIME_INVINCIBLE) invincibilityTime += Time.deltaTime;
+		else
+		{
+			rend.sharedMaterial = defaultMaterial;
+			invincibilityTime = TIME_INVINCIBLE;
+			if (currentPowerType != PowerUp.Type.Shield) isInvincible = false;	
+		}
 		ClampToPlaySpace();
     }
 
@@ -163,7 +176,7 @@ public class Player : MonoBehaviour
 
 	public void IncreaseSize()
 	{
-		transform.localScale = transform.localScale * 1.02f;
+		transform.localScale = transform.localScale * 1.03f;
 	}
 
 	private Vector3 GetBounceDirection()
@@ -291,12 +304,20 @@ public class Player : MonoBehaviour
 		}
 	}
 
-	public void TakeDamage(int amount)
+	public void TakeDamage()
 	{
-		health -= amount;
-		healthCounter.DecrementDisplay();
+		if (!isInvincible)
+		{
+			rend.sharedMaterial = hurtFace;
+			isInvincible = true;
+			health--;
+			healthCounter.DecrementDisplay();
+		}
+
+		invincibilityTime = 0;
 		if (health <= 0)
 		{
+			FreezePosition();
 			// TODO: explosion animation here
 			ScreenManager sm = FindObjectOfType<ScreenManager>();
 			sm.EndGame();
@@ -318,7 +339,7 @@ public class Player : MonoBehaviour
 	{
 		powerUpActive = false;
 		// renderer.material.color = defaultColour;
-		if (currentPowerType == PowerUp.Type.Shield) halo.enabled = false;
+		if (currentPowerType == PowerUp.Type.Shield) halo.enabled = isInvincible = false;
 		currentPowerType = powerUps[powerIndex];
 		CancelInvoke("FireGun");
 	}

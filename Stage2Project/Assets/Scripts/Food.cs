@@ -19,23 +19,7 @@ public class Food : MonoBehaviour {
 
 	void OnCollisionEnter(Collision col)
 	{
-		if (col.gameObject.tag == "Player")
-		{
-			Player player = col.gameObject.GetComponent<Player>();
-			if (player.currentPowerType == PowerUp.Type.Star && Input.GetButton("Fire1"))
-			{
-				Vector3 bounceDirection = -(col.contacts[0].point - transform.position).normalized;
-				mBody.AddForce(bounceDirection * bounceFactor);
-				health--;
-			}
-			else
-			{
-				player.IncreaseSize();
-				score.IncrementScore(ScoreValue);
-				Destroy(gameObject);
-			}
-		}
-		else if (col.gameObject.tag == "Horizontal wall" || col.gameObject.tag == "Vertical wall")
+		if (col.gameObject.tag == "Horizontal wall" || col.gameObject.tag == "Vertical wall")
 		{
 			health--;
 		}
@@ -49,5 +33,26 @@ public class Food : MonoBehaviour {
 	void OnParticleCollision(GameObject particle)
 	{
 		if (particle.tag == "Explosion") Destroy(gameObject);
+	}
+
+	void OnTriggerEnter(Collider col)
+	{
+		if (col.gameObject.tag == "Player")
+		{
+			Player player = col.gameObject.GetComponent<Player>();
+			if (player.currentPowerType == PowerUp.Type.Star && Input.GetButton("Fire1"))
+			{
+				Vector3 bounceDirection = bounceFactor * (Vector3.forward * Random.Range(-1f, 1f)
+										+ Vector3.right * Random.Range(-1f, 1f)).normalized;
+				mBody.AddForce(bounceDirection * bounceFactor);
+				health--;
+			}
+			else
+			{
+				player.IncreaseSize();
+				score.IncrementScore(ScoreValue);
+				Destroy(gameObject);
+			}
+		} 
 	}
 }
