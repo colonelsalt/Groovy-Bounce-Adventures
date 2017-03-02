@@ -26,5 +26,6 @@ public class Score : MonoBehaviour {
 	public void ResetScore()
 	{
 		score = 0;
+		scoreDisplay.text = score.ToString();
 	}
 }

@@ -69,6 +69,7 @@ public class Player : MonoBehaviour
     {
 		health = MAXHEALTH;
 		rend.enabled = true;
+		GetComponent<Collider>().enabled = true;
 		touchingHorizontal = true;
     	touchingVertical = powerUpActive = isInvincible = false;
     	currentPowerType = PowerUp.Type.None;
@@ -350,9 +351,9 @@ public class Player : MonoBehaviour
 		if (health <= 0)
 		{
 			FreezePosition();
-			// TODO: death sound here
-			Instantiate(playerDeathPrefab, transform);
 			rend.enabled = false;
+			GetComponent<Collider>().enabled = false;
+			Instantiate(playerDeathPrefab, transform);
 		}
 	}
 

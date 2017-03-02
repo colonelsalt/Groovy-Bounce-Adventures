@@ -42,6 +42,7 @@ public class PlayerExplosion : MonoBehaviour {
 		{
 			if (!ps.IsAlive())
 			{
+				particlesBegun = false;
 				instance = null;
 				ScreenManager sm = FindObjectOfType<ScreenManager>();
 				Destroy(gameObject, 2f);
